@@ -1,7 +1,8 @@
 import re
 import h5py
-if int(re.sub('\.', '', h5py.version.version)) < 230 :
-    raise ImportError("Using h5py version %s. Version must be >= 2.3.0" % (h5py.version.version))
+if int(re.sub('\.', '', h5py.version.version)) < 230:
+    raise ImportError(
+        "Using h5py version %s. Version must be >= 2.3.0" % (h5py.version.version))
 
 import numpy
 import collections
@@ -33,7 +34,8 @@ import ast
 ######################################################################
 # a) Outdated version
 
-def load_h5_old(filename, sep='_') :
+
+def load_h5_old(filename, sep='_'):
     '''
     Loads h5-file and extracts the dictionary within it.
 
@@ -44,13 +46,13 @@ def load_h5_old(filename, sep='_') :
 
     f = h5py.File(filename, 'r')
     flat_dict = {}
-    for k, v in f.items() :
+    for k, v in f.items():
         value = numpy.array(v[:])
         value = list(v[:])
 
-        if len(value) :
+        if len(value):
             flat_dict[k] = value[0]
-        else :
+        else:
             flat_dict[k] = value
     f.close()
     dic = unflatten(flat_dict, separator=sep)
@@ -62,7 +64,7 @@ def load_h5_old(filename, sep='_') :
 
 # Auxiliary functions
 
-def delete_group(f, group) :
+def delete_group(f, group):
     try:
         f = h5py.File(f, 'r+')
         try:
@@ -73,6 +75,7 @@ def delete_group(f, group) :
     except IOError:
         pass
 
+
 def node_exists(f, key):
     f = h5py.File(f, 'r')
     exist = key in f
@@ -80,22 +83,23 @@ def node_exists(f, key):
     return exist
 
 
-def dict_to_h5(d, f, overwrite_dataset, compression=None, **keywords) :
-    if 'parent_group' in keywords :
+def dict_to_h5(d, f, overwrite_dataset, compression=None, **keywords):
+    if 'parent_group' in keywords:
         parent_group = keywords['parent_group']
     else:
         parent_group = f.parent
 
-    for k, v in d.items() :
-        if isinstance(v, collections.MutableMapping) :
+    for k, v in d.items():
+        if isinstance(v, collections.MutableMapping):
             if parent_group.name != '/':
                 group_name = parent_group.name + '/' + str(k)
             else:
                 group_name = parent_group.name + str(k)
             group = f.require_group(group_name)
-            dict_to_h5(v, f, overwrite_dataset, parent_group=group, compression=compression)
+            dict_to_h5(
+                v, f, overwrite_dataset, parent_group=group, compression=compression)
         else:
-            if not str(k) in parent_group.keys() :
+            if not str(k) in parent_group.keys():
                 create_dataset(parent_group, k, v, compression=compression)
             else:
                 if overwrite_dataset == True:
@@ -109,30 +113,35 @@ def dict_to_h5(d, f, overwrite_dataset, compression=None, **keywords) :
 def create_dataset(parent_group, k, v, compression=None):
     shp = numpy.shape(v)
     if v is None:
-        parent_group.create_dataset(str(k), data='None', compression=compression)
+        parent_group.create_dataset(
+            str(k), data='None', compression=compression)
     else:
         if isinstance(v, (list, numpy.ndarray)):
-                if numpy.array(v).dtype.name == 'object':
-                    if len(shp) > 1:
-                        print 'Dataset', k, 'has an unsupported format!'
-                    else:
-                        # store 2d array with an unsupported format by reducing
-                        # it to a 1d array and storing the original shape
-                        # this does not work in 3d!
-                        oldshape = numpy.array([len(x) for x in v])
-                        data_reshaped = numpy.hstack(v)
-                        data_set = parent_group.create_dataset(str(k), data=data_reshaped, compression=compression)
-                        data_set.attrs['oldshape'] = oldshape
-                        data_set.attrs['custom_shape'] = True
-                elif isinstance(v, pq.Quantity) :
-                    data_set = parent_group.create_dataset(str(k), data=v)
-                    data_set.attrs['_unit'] = v.dimensionality.string
-                else :
-                    data_set = parent_group.create_dataset(str(k), data=v, compression=compression)
-        elif isinstance(v, (int, float)) :  # ## ignore compression argument for scalar datasets
+            if numpy.array(v).dtype.name == 'object':
+                if len(shp) > 1:
+                    print 'Dataset', k, 'has an unsupported format!'
+                else:
+                    # store 2d array with an unsupported format by reducing
+                    # it to a 1d array and storing the original shape
+                    # this does not work in 3d!
+                    oldshape = numpy.array([len(x) for x in v])
+                    data_reshaped = numpy.hstack(v)
+                    data_set = parent_group.create_dataset(
+                        str(k), data=data_reshaped, compression=compression)
+                    data_set.attrs['oldshape'] = oldshape
+                    data_set.attrs['custom_shape'] = True
+            elif isinstance(v, pq.Quantity):
+                data_set = parent_group.create_dataset(str(k), data=v)
+                data_set.attrs['_unit'] = v.dimensionality.string
+            else:
+                data_set = parent_group.create_dataset(
+                    str(k), data=v, compression=compression)
+        # ## ignore compression argument for scalar datasets
+        elif isinstance(v, (int, float)):
             data_set = parent_group.create_dataset(str(k), data=v)
         else:
-            data_set = parent_group.create_dataset(str(k), data=v, compression=compression)
+            data_set = parent_group.create_dataset(
+                str(k), data=v, compression=compression)
 
         # ## Explicitely store type of key
         _key_type = type(k).__name__
@@ -145,14 +154,16 @@ def dict_from_h5(f, lazy=False):
     if h5py.h5i.get_type(f.id) == 5:  # check if f is a dataset
         if not lazy:
             if hasattr(f, 'value'):
-                if 'EMPTYARRAY' in str(f.value):  # ## This if-branch exists to enable loading of deprecated hdf5 files
+                # ## This if-branch exists to enable loading of deprecated hdf5 files
+                if 'EMPTYARRAY' in str(f.value):
                     shp = f.value.split('_')[1]
-                    shp = tuple(int(i) for i in shp[1:-1].split(',') if i != '')
+                    shp = tuple(int(i)
+                                for i in shp[1:-1].split(',') if i != '')
                     return numpy.reshape(numpy.array([]), shp)
                 elif str(f.value) == 'None':
                     return None
                 else:
-                    if len(f.attrs.keys()) > 0 and 'custom_shape' in f.attrs.keys() :
+                    if len(f.attrs.keys()) > 0 and 'custom_shape' in f.attrs.keys():
                         if f.attrs['custom_shape']:
                             return load_custom_shape(f.attrs['oldshape'], f.value)
                     else:
@@ -164,40 +175,48 @@ def dict_from_h5(f, lazy=False):
     else:
         d = {}
         items = f.items()
-        for name, obj in items :
-            if h5py.h5i.get_type(obj.id) == 2 :  # Check if obj is a group or a dataset
+        for name, obj in items:
+            # Check if obj is a group or a dataset
+            if h5py.h5i.get_type(obj.id) == 2:
                 sub_d = dict_from_h5(obj, lazy=lazy)
                 d[name] = sub_d
-            else :
+            else:
                 if not lazy:
                     if hasattr(obj, 'value'):
                         if 'EMPTYARRAY' in str(obj.value):
                             shp = obj.value.split('_')[1]
-                            shp = tuple(int(i) for i in shp[1:-1].split(',') if i != '')
+                            shp = tuple(int(i)
+                                        for i in shp[1:-1].split(',') if i != '')
                             d[name] = numpy.reshape(numpy.array([]), shp)
                         elif str(obj.value) == 'None':
                             d[name] = None
                         else:
-                            # if dataset has custom_shape=True, we rebuild the original array
-                            if len(obj.attrs.keys()) > 0 :
-                                if 'custom_shape' in obj.attrs.keys() :
+                            # if dataset has custom_shape=True, we rebuild the
+                            # original array
+                            if len(obj.attrs.keys()) > 0:
+                                if 'custom_shape' in obj.attrs.keys():
                                     if obj.attrs['custom_shape']:
-                                        d[name] = load_custom_shape(obj.attrs['oldshape'], obj.value)
-                                elif '_unit' in obj.attrs.keys() :
-                                    d[name] = pq.Quantity(obj.value, obj.attrs['_unit'])
-                                elif '_key_type' in obj.attrs.keys() :
-                                    # added string_ to handle numpy.string_, TODO: find general soluation for numpy data types
-                                    if obj.attrs['_key_type'] not in ['str', 'unicode', 'string_'] :
+                                        d[name] = load_custom_shape(
+                                            obj.attrs['oldshape'], obj.value)
+                                elif '_unit' in obj.attrs.keys():
+                                    d[name] = pq.Quantity(
+                                        obj.value, obj.attrs['_unit'])
+                                elif '_key_type' in obj.attrs.keys():
+                                    # added string_ to handle numpy.string_,
+                                    # TODO: find general soluation for numpy
+                                    # data types
+                                    if obj.attrs['_key_type'] not in ['str', 'unicode', 'string_']:
                                         d[ast.literal_eval(name)] = obj.value
-                                    else :
+                                    else:
                                         d[name] = obj.value
                             else:
                                 d[name] = obj.value
                     else:
                         d[name] = numpy.array([])
-                else :
+                else:
                     d[name] = None
         return d
+
 
 def load_custom_shape(oldshape, oldata):
     data_reshaped = []
@@ -209,7 +228,7 @@ def load_custom_shape(oldshape, oldata):
 
 
 # Save routine
-def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False, resize=False, dict_label='', compression=None) :
+def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False, resize=False, dict_label='', compression=None):
     '''
     Save dictionary containing data to hdf5 file.
 
@@ -226,10 +245,12 @@ def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False, resize=False
     try:
         f = h5py.File(filename, write_mode)
     except IOError:
-        raise IOError('unable to create ' + filename + ' (File accessability: Unable to open file)')
-    if dict_label != '' :
+        raise IOError(
+            'unable to create ' + filename + ' (File accessability: Unable to open file)')
+    if dict_label != '':
         base = f.require_group(dict_label)
-        dict_to_h5(d, f, overwrite_dataset, parent_group=base, compression=compression)
+        dict_to_h5(
+            d, f, overwrite_dataset, parent_group=base, compression=compression)
     else:
         dict_to_h5(d, f, overwrite_dataset, compression=compression)
     fname = f.filename
@@ -240,7 +261,9 @@ def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False, resize=False
     return 0
 
 # Load routine
-def load_h5(filename, path='', lazy=False) :
+
+
+def load_h5(filename, path='', lazy=False):
     '''
     The Function returns a dictionary of all dictionaries that are
     stored in the HDF5 File.
@@ -256,7 +279,8 @@ def load_h5(filename, path='', lazy=False) :
     try:
         f = h5py.File(filename, 'r')
     except IOError:
-        raise IOError('unable to open \"' + filename + '\" (File accessability: Unable to open file)')
+        raise IOError('unable to open \"' + filename +
+                      '\" (File accessability: Unable to open file)')
     if path == '':
         d = dict_from_h5(f, lazy=lazy)
     else:
@@ -266,14 +290,15 @@ def load_h5(filename, path='', lazy=False) :
             d = dict_from_h5(f[path], lazy=lazy)
         else:
             f.close()
-            raise KeyError('unable to open \"' + filename + '/' + path + '\" (Key accessability: Unable to access key)')
+            raise KeyError('unable to open \"' + filename + '/' +
+                           path + '\" (Key accessability: Unable to access key)')
     f.close()
     return d
 
 
 ######################################################################
 # Transform outdated file to new file
-def transform_h5(filename, new_filename) :
+def transform_h5(filename, new_filename):
     '''
     Transform function which simply takes a file created in
     the outdated manner and converts it to a file of the new kind.
@@ -288,8 +313,8 @@ def example():
     filename = 'example.hdf5'
     d = {}
     d['a'] = {'a1': numpy.array([1, 2, 3]),
-        'a2': 4.0,
-        'a3': {'a31': 'Test'}}
+              'a2': 4.0,
+              'a3': {'a31': 'Test'}}
     d['b'] = numpy.arange(0., 0.5, 0.01)
     d['c'] = 'string'
 
