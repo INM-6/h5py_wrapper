@@ -201,6 +201,29 @@ def store_and_test_key_types() :
     keys = ['a',(1,2),4.]
     for k in keys :
         assert(k in res.keys())
+
+def load_lazy_simple() :
+    res = {}
+    for key,val in zip(simpledata_str,simpledata_val):
+        res[key] = val
+    h5w.add_to_h5(fn,res,write_mode='w')
+    res.clear()
+    res = h5w.load_h5(fn, lazy=True)
+    for key,obj in res.items() :
+        assert(obj==None)
+
+
+def load_lazy_nested() :
+    res = {'a':1,'test1':{'b':2},'test2':{'test3':{'c':numpy.array([1,2,3])}}}
+    h5w.add_to_h5(fn,res,write_mode='w')
+    res.clear()
+    res = h5w.load_h5(fn, lazy=True)
+    assert(res['a']==None)
+    assert(res['test1']['b']==None)
+    assert(res['test2']['test3']['c']==None)
+
+
+    
 #def handle_existing_dataset
 #def handle_existing_group
 
@@ -275,5 +298,9 @@ store_and_load_with_compression()
 
 # test storage of different types of keys
 store_and_test_key_types()
+
+load_lazy_simple()
+
+load_lazy_nested()
 
 print 'test_wrapper: success'

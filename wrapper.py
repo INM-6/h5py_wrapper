@@ -139,58 +139,64 @@ def create_dataset(parent_group, k, v, compression=None):
         data_set.attrs['_key_type'] = _key_type
 
 
-def dict_from_h5(f):
+def dict_from_h5(f, lazy=False):
     # .value converts everything(?) to numpy.arrays
     # maybe there is a different option to load it, to keep, e.g., list-type
     if h5py.h5i.get_type(f.id) == 5:  # check if f is a dataset
-        if hasattr(f, 'value'):
-            if 'EMPTYARRAY' in str(f.value):  # ## This if-branch exists to enable loading of deprecated hdf5 files
-                shp = f.value.split('_')[1]
-                shp = tuple(int(i) for i in shp[1:-1].split(',') if i != '')
-                return numpy.reshape(numpy.array([]), shp)
-            elif str(f.value) == 'None':
-                return None
-            else:
-                if len(f.attrs.keys()) > 0 and 'custom_shape' in f.attrs.keys() :
-                    if f.attrs['custom_shape']:
-                        return load_custom_shape(f.attrs['oldshape'], f.value)
+        if not lazy:
+            if hasattr(f, 'value'):
+                if 'EMPTYARRAY' in str(f.value):  # ## This if-branch exists to enable loading of deprecated hdf5 files
+                    shp = f.value.split('_')[1]
+                    shp = tuple(int(i) for i in shp[1:-1].split(',') if i != '')
+                    return numpy.reshape(numpy.array([]), shp)
+                elif str(f.value) == 'None':
+                    return None
                 else:
-                    return f.value
+                    if len(f.attrs.keys()) > 0 and 'custom_shape' in f.attrs.keys() :
+                        if f.attrs['custom_shape']:
+                            return load_custom_shape(f.attrs['oldshape'], f.value)
+                    else:
+                        return f.value
+            else:
+                return numpy.array([])
         else:
-            return numpy.array([])
+            return None
     else:
         d = {}
         items = f.items()
         for name, obj in items :
             if h5py.h5i.get_type(obj.id) == 2 :  # Check if obj is a group or a dataset
-                sub_d = dict_from_h5(obj)
+                sub_d = dict_from_h5(obj, lazy=lazy)
                 d[name] = sub_d
             else :
-                if hasattr(obj, 'value'):
-                    if 'EMPTYARRAY' in str(obj.value):
-                        shp = obj.value.split('_')[1]
-                        shp = tuple(int(i) for i in shp[1:-1].split(',') if i != '')
-                        d[name] = numpy.reshape(numpy.array([]), shp)
-                    elif str(obj.value) == 'None':
-                        d[name] = None
-                    else:
-                        # if dataset has custom_shape=True, we rebuild the original array
-                        if len(obj.attrs.keys()) > 0 :
-                            if 'custom_shape' in obj.attrs.keys() :
-                                if obj.attrs['custom_shape']:
-                                    d[name] = load_custom_shape(obj.attrs['oldshape'], obj.value)
-                            elif '_unit' in obj.attrs.keys() :
-                                d[name] = pq.Quantity(obj.value, obj.attrs['_unit'])
-                            elif '_key_type' in obj.attrs.keys() :
-                                # added string_ to handle numpy.string_, TODO: find general soluation for numpy data types
-                                if obj.attrs['_key_type'] not in ['str', 'unicode', 'string_'] :
-                                    d[ast.literal_eval(name)] = obj.value
-                                else :
-                                    d[name] = obj.value
+                if not lazy:
+                    if hasattr(obj, 'value'):
+                        if 'EMPTYARRAY' in str(obj.value):
+                            shp = obj.value.split('_')[1]
+                            shp = tuple(int(i) for i in shp[1:-1].split(',') if i != '')
+                            d[name] = numpy.reshape(numpy.array([]), shp)
+                        elif str(obj.value) == 'None':
+                            d[name] = None
                         else:
-                            d[name] = obj.value
-                else:
-                    d[name] = numpy.array([])
+                            # if dataset has custom_shape=True, we rebuild the original array
+                            if len(obj.attrs.keys()) > 0 :
+                                if 'custom_shape' in obj.attrs.keys() :
+                                    if obj.attrs['custom_shape']:
+                                        d[name] = load_custom_shape(obj.attrs['oldshape'], obj.value)
+                                elif '_unit' in obj.attrs.keys() :
+                                    d[name] = pq.Quantity(obj.value, obj.attrs['_unit'])
+                                elif '_key_type' in obj.attrs.keys() :
+                                    # added string_ to handle numpy.string_, TODO: find general soluation for numpy data types
+                                    if obj.attrs['_key_type'] not in ['str', 'unicode', 'string_'] :
+                                        d[ast.literal_eval(name)] = obj.value
+                                    else :
+                                        d[name] = obj.value
+                            else:
+                                d[name] = obj.value
+                    else:
+                        d[name] = numpy.array([])
+                else :
+                    d[name] = None
         return d
 
 def load_custom_shape(oldshape, oldata):
@@ -234,7 +240,7 @@ def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False, resize=False
     return 0
 
 # Load routine
-def load_h5(filename, path='') :
+def load_h5(filename, path='', lazy=False) :
     '''
     The Function returns a dictionary of all dictionaries that are
     stored in the HDF5 File.
@@ -242,6 +248,8 @@ def load_h5(filename, path='') :
     **Args**:
         filename: file name of the hdf5 file to be loaded
         path: argument to access deeper levels in the hdf5 file (default='')
+        lazy: boolean, default: False
+              If True, only the structure of the file is loaded without actual data    
     '''
 
     d = {}
@@ -250,12 +258,12 @@ def load_h5(filename, path='') :
     except IOError:
         raise IOError('unable to open \"' + filename + '\" (File accessability: Unable to open file)')
     if path == '':
-        d = dict_from_h5(f)
+        d = dict_from_h5(f, lazy=lazy)
     else:
         if path[0] == '/':
             path = path[1:]
         if node_exists(filename, path):
-            d = dict_from_h5(f[path])
+            d = dict_from_h5(f[path], lazy=lazy)
         else:
             f.close()
             raise KeyError('unable to open \"' + filename + '/' + path + '\" (Key accessability: Unable to access key)')
