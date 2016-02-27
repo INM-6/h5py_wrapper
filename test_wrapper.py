@@ -27,7 +27,7 @@ dn0 = {'d1': d0, 'd2': d0}
 # define containers
 simpledata_str = ['i', 'f', 's']
 simpledata_val = [i0, f0, s0]
-            
+
 arraydata_str = ['ai', 'as', 'm']
 arraydata_val = [a0i, a0s, m0]
 
