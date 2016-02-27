@@ -27,7 +27,7 @@ dn0 = {'d1': d0, 'd2': d0}
 # define containers
 simpledata_str = ['i', 'f', 's']
 simpledata_val = [i0, f0, s0]
-
+            
 arraydata_str = ['ai', 'as', 'm']
 arraydata_val = [a0i, a0s, m0]
 
@@ -36,27 +36,26 @@ dictdata_val = [d0]
 
 
 class WrapperTest(unittest.TestCase):
-
-    def test_write_and_load_with_label(self):
+    def construct_simpledata(self):
         res = {}
         for key, val in zip(simpledata_str, simpledata_val):
             res[key] = val
+        return res
+    
+    def test_write_and_load_with_label(self):
+        res = self.construct_simpledata()
         wrapper.add_to_h5(fn, res, write_mode='w', dict_label='test_label')
         for key, val in zip(simpledata_str, simpledata_val):
             assert(wrapper.load_h5(fn, 'test_label/' + key) == val)
 
     def test_store_and_load_dataset_directly(self):
-        res = {}
-        for key, val in zip(simpledata_str, simpledata_val):
-            res[key] = val
+        res = self.construct_simpledata()
         wrapper.add_to_h5(fn, res, write_mode='w')
         for key, val in zip(simpledata_str, simpledata_val):
             assert(wrapper.load_h5(fn, '/' + key) == val)
 
     def test_old_store_and_load_simpledata(self):
-        res = {}
-        for key, val in zip(simpledata_str, simpledata_val):
-            res[key] = val
+        res = self.construct_simpledata()
         wrapper.add_to_h5(fn, res, write_mode='w')
         res.clear()
         res = wrapper.load_h5(fn)
@@ -64,9 +63,7 @@ class WrapperTest(unittest.TestCase):
             assert(res[key] == val)
 
     def test_store_and_load_simpledata(self):
-        res = {}
-        for key, val in zip(simpledata_str, simpledata_val):
-            res[key] = val
+        res = self.construct_simpledata()
         wrapper.add_to_h5(fn, res, write_mode='w')
         res.clear()
         res = wrapper.load_h5(fn)
@@ -213,9 +210,7 @@ class WrapperTest(unittest.TestCase):
             assert(k in res.keys())
 
     def test_load_lazy_simple(self):
-        res = {}
-        for key, val in zip(simpledata_str, simpledata_val):
-            res[key] = val
+        res = self.construct_simpledata()
         wrapper.add_to_h5(fn, res, write_mode='w')
         res.clear()
         res = wrapper.load_h5(fn, lazy=True)
