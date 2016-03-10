@@ -28,8 +28,8 @@ import os
 import re
 import h5py
 if int(re.sub('\.', '', h5py.version.version)) < 230:
-    raise ImportError("Using h5py version %s. Version must be >= \
-    2.3.0" % (h5py.version.version))
+    raise ImportError("Using h5py version {version}. Version must "
+                      "be >= 2.3.0".format(version=h5py.version.version))
 
 import numpy as np
 import collections
