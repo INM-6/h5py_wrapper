@@ -192,7 +192,7 @@ class WrapperTest(unittest.TestCase):
         h5w.add_to_h5(fn, res, write_mode='w')
         res.clear()
         res = h5w.load_h5(fn)
-        self.assertTrue(res['a1'] is None)
+        self.assertIsNone(res['a1'])
 
     def test_handle_nonexisting_file(self):
         try:
@@ -220,7 +220,8 @@ class WrapperTest(unittest.TestCase):
         h5w.add_to_h5(fn, data, overwrite_dataset=True)
         # loading the whole data
         res = h5w.load_h5(fn)
-        self.assertEqual(res['times'].dimensionality, data['times'].dimensionality)
+        self.assertEqual(res['times'].dimensionality,
+                         data['times'].dimensionality)
 
     def test_store_and_load_with_compression(self):
         data = {'a': 1, 'test1': {'b': 2}, 'test2': {
@@ -235,8 +236,8 @@ class WrapperTest(unittest.TestCase):
 
         keys = ['a', (1, 2), 4.]
         for k in keys:
-            self.assertTrue(k in res.keys())
-        self.assertTrue(4 in res[(1, 2)].keys())
+            self.assertIn(k, res.keys())
+        self.assertIn(4, res[(1, 2)].keys())
 
     def test_load_lazy_simple(self):
         res = self.construct_simpledata()
@@ -244,7 +245,7 @@ class WrapperTest(unittest.TestCase):
         res.clear()
         res = h5w.load_h5(fn, lazy=True)
         for key, obj in res.items():
-            self.assertTrue(obj is None)
+            self.assertIsNone(obj)
 
     def test_load_lazy_nested(self):
         res = {'a': 1, 'test1': {'b': 2}, 'test2': {
@@ -252,6 +253,6 @@ class WrapperTest(unittest.TestCase):
         h5w.add_to_h5(fn, res, write_mode='w')
         res.clear()
         res = h5w.load_h5(fn, lazy=True)
-        self.assertTrue(res['a'] is None)
-        self.assertTrue(res['test1']['b'] is None)
-        self.assertTrue(res['test2']['test3']['c'] is None)
+        self.assertIsNone(res['a'])
+        self.assertIsNone(res['test1']['b'])
+        self.assertIsNone(res['test2']['test3']['c'])
