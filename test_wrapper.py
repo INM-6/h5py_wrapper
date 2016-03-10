@@ -259,5 +259,5 @@ class WrapperTest(unittest.TestCase):
     def test_write_unicode(self):
         l = ['a', 'b']
         l2 = [unicode(n) for n in l]
-        wrapper.add_to_h5(fn, {'l': l2})
+        h5w.add_to_h5(fn, {'l': l2})
 
