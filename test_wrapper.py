@@ -221,7 +221,7 @@ class WrapperTest(unittest.TestCase):
         # loading the whole data
         res = h5w.load_h5(fn)
         assert(res['times'].dimensionality == data['times'].dimensionality)
-            
+
     def test_store_and_load_with_compression(self):
         data = {'a': 1, 'test1': {'b': 2}, 'test2': {
             'test3': {'c': np.array([1, 2, 3])}}}
