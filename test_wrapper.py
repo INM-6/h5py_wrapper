@@ -64,13 +64,13 @@ class WrapperTest(unittest.TestCase):
         res = self.construct_simpledata()
         h5w.add_to_h5(fn, res, write_mode='w', dict_label='test_label')
         for key, val in zip(simpledata_str, simpledata_val):
-            assert(h5w.load_h5(fn, 'test_label/' + key) == val)
+            self.assertEqual(h5w.load_h5(fn, 'test_label/' + key), val)
 
     def test_store_and_load_dataset_directly(self):
         res = self.construct_simpledata()
         h5w.add_to_h5(fn, res, write_mode='w')
         for key, val in zip(simpledata_str, simpledata_val):
-            assert(h5w.load_h5(fn, '/' + key) == val)
+            self.assertEqual(h5w.load_h5(fn, '/' + key), val)
 
     def test_old_store_and_load_simpledata(self):
         res = self.construct_simpledata()
@@ -78,7 +78,7 @@ class WrapperTest(unittest.TestCase):
         res.clear()
         res = h5w.load_h5(fn)
         for key, val in zip(simpledata_str, simpledata_val):
-            assert(res[key] == val)
+            self.assertEqual(res[key], val)
 
     def test_store_and_load_simpledata(self):
         res = self.construct_simpledata()
@@ -86,7 +86,7 @@ class WrapperTest(unittest.TestCase):
         res.clear()
         res = h5w.load_h5(fn)
         for key, val in zip(simpledata_str, simpledata_val):
-            assert(res[key] == val)
+            self.assertEqual(res[key], val)
 
     def test_store_and_load_arraydata(self):
         res = {}
@@ -127,7 +127,7 @@ class WrapperTest(unittest.TestCase):
         res = h5w.load_h5(fn)
         for dkey, dval in zip(dictdata_str, dictdata_val):
             for key, val in dval.items():
-                assert(res[dkey][key] == val)
+                self.assertEqual(res[dkey][key], val)
 
     def test_overwrite_dataset(self):
         res = {'a': 5}
@@ -138,14 +138,14 @@ class WrapperTest(unittest.TestCase):
                           fn, res, write_mode='a', overwrite_dataset=False)
         res.clear()
         res = h5w.load_h5(fn)
-        assert(res['a'] == 5)  # dataset should still contain old value
+        self.assertEqual(res['a'], 5)  # dataset should still contain old value
         res.clear()
         res = {'a': 6}
         h5w.add_to_h5(
             fn, res, write_mode='a', overwrite_dataset=True)
         res.clear()
         res = h5w.load_h5(fn)
-        assert(res['a'] == 6)  # dataset should contain new value
+        self.assertEqual(res['a'], 6)  # dataset should contain new value
 
     def test_write_empty_array(self):
         res = {'a': [], 'b': np.array([])}
@@ -161,9 +161,9 @@ class WrapperTest(unittest.TestCase):
         res.clear()
         res = h5w.load_h5(fn)
         assert_array_equal(res['a'], [[], []])
-        assert(np.shape(res['a']) == (2, 0))
+        self.assertEqual(np.shape(res['a']), (2, 0))
         assert_array_equal(res['b'], [[], []])
-        assert(np.shape(res['b']) == (2, 0))
+        self.assertEqual(np.shape(res['b']), (2, 0))
 
     def test_read_empty_array_via_path(self):
         res = {'a': np.array([[], []])}
@@ -171,7 +171,7 @@ class WrapperTest(unittest.TestCase):
         res.clear()
         res = h5w.load_h5(fn, path='a')
         assert_array_equal(res, [[], []])
-        assert(np.shape(res) == (2, 0))
+        self.assertEqual(np.shape(res), (2, 0))
 
     def test_handle_nonexisting_path(self):
         res = {}
@@ -185,14 +185,14 @@ class WrapperTest(unittest.TestCase):
             h5w.add_to_h5(fn, res)
             res.clear()
             res = h5w.load_h5(fn, path='test/')
-            assert(res == stest)
+            self.assertEqual(res, stest)
 
     def test_store_none(self):
         res = {'a1': None}
         h5w.add_to_h5(fn, res, write_mode='w')
         res.clear()
         res = h5w.load_h5(fn)
-        assert(res['a1'] is None)
+        self.assertTrue(res['a1'] is None)
 
     def test_handle_nonexisting_file(self):
         try:
@@ -207,11 +207,11 @@ class WrapperTest(unittest.TestCase):
         # loading the whole data
         res = h5w.load_h5(fn)
         for i in xrange(len(a)):
-            assert(np.sum(a[i] - res['a'][i]) < 1e-12)
+            self.assertTrue(np.sum(a[i] - res['a'][i]) < 1e-12)
         # loading path directly
         res = h5w.load_h5(fn, path='a/')
         for i in xrange(len(a)):
-            assert(np.sum(a[i] - res[i]) < 1e-12)
+            self.assertTrue(np.sum(a[i] - res[i]) < 1e-12)
 
     @unittest.skipUnless(quantities_found, 'No h5py_wrapper found.')
     def test_store_and_load_quantities_array(self):
@@ -220,7 +220,7 @@ class WrapperTest(unittest.TestCase):
         h5w.add_to_h5(fn, data, overwrite_dataset=True)
         # loading the whole data
         res = h5w.load_h5(fn)
-        assert(res['times'].dimensionality == data['times'].dimensionality)
+        self.assertEqual(res['times'].dimensionality, data['times'].dimensionality)
 
     def test_store_and_load_with_compression(self):
         data = {'a': 1, 'test1': {'b': 2}, 'test2': {
@@ -235,8 +235,8 @@ class WrapperTest(unittest.TestCase):
 
         keys = ['a', (1, 2), 4.]
         for k in keys:
-            assert(k in res.keys())
-        assert(4 in res[(1, 2)].keys())
+            self.assertTrue(k in res.keys())
+        self.assertTrue(4 in res[(1, 2)].keys())
 
     def test_load_lazy_simple(self):
         res = self.construct_simpledata()
@@ -244,7 +244,7 @@ class WrapperTest(unittest.TestCase):
         res.clear()
         res = h5w.load_h5(fn, lazy=True)
         for key, obj in res.items():
-            assert(obj is None)
+            self.assertTrue(obj is None)
 
     def test_load_lazy_nested(self):
         res = {'a': 1, 'test1': {'b': 2}, 'test2': {
@@ -252,6 +252,6 @@ class WrapperTest(unittest.TestCase):
         h5w.add_to_h5(fn, res, write_mode='w')
         res.clear()
         res = h5w.load_h5(fn, lazy=True)
-        assert(res['a'] is None)
-        assert(res['test1']['b'] is None)
-        assert(res['test2']['test3']['c'] is None)
+        self.assertTrue(res['a'] is None)
+        self.assertTrue(res['test1']['b'] is None)
+        self.assertTrue(res['test2']['test3']['c'] is None)
