@@ -216,8 +216,8 @@ def _create_dataset(parent_group, key, value, compression=None):
                 dataset.attrs['oldshape'] = oldshape
                 dataset.attrs['custom_shape'] = True
         elif quantities_found and isinstance(value, pq.Quantity):
-                dataset = parent_group.create_dataset(str(key), data=value)
-                dataset.attrs['_unit'] = value.dimensionality.string
+            dataset = parent_group.create_dataset(str(key), data=value)
+            dataset.attrs['_unit'] = value.dimensionality.string
         else:
             dataset = parent_group.create_dataset(
                 str(key), data=value, compression=compression)
