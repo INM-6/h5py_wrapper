@@ -33,9 +33,15 @@ if int(re.sub('\.', '', h5py.version.version)) < 230:
 
 import numpy as np
 import collections
-import quantities as pq
 from subprocess import call
 import ast
+
+# check whether quantities is available
+try:
+    import quantities as pq
+    quantities_found = True
+except ImportError:
+    quantities_found = False
 
 
 def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
@@ -209,9 +215,9 @@ def _create_dataset(parent_group, key, value, compression=None):
                     str(key), data=data_reshaped, compression=compression)
                 dataset.attrs['oldshape'] = oldshape
                 dataset.attrs['custom_shape'] = True
-        elif isinstance(value, pq.Quantity):
-            dataset = parent_group.create_dataset(str(key), data=value)
-            dataset.attrs['_unit'] = value.dimensionality.string
+        elif quantities_found and isinstance(value, pq.Quantity):
+                dataset = parent_group.create_dataset(str(key), data=value)
+                dataset.attrs['_unit'] = value.dimensionality.string
         else:
             dataset = parent_group.create_dataset(
                 str(key), data=value, compression=compression)
@@ -258,8 +264,13 @@ def _load_dataset(f, lazy=False):
                         'custom_shape' in f.attrs.keys()):
                     return _load_custom_shape(f)
                 elif '_unit' in f.attrs.keys():
-                    return pq.Quantity(
-                        f.value, f.attrs['_unit'])
+                    if quantities_found:
+                        return pq.Quantity(
+                            f.value, f.attrs['_unit'])
+                    else:
+                        raise ImportError("Could not find quantities package, "
+                                          "please install the package and "
+                                          "reload the wrapper.")
                 else:
                     return f.value
         else:

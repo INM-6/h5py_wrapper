@@ -207,14 +207,17 @@ class WrapperTest(unittest.TestCase):
             assert(np.sum(a[i] - res[i]) < 1e-12)
 
     def test_store_and_load_quantities_array(self):
-        import quantities as pq
-        data = {'times': np.array(
-            [1, 2, 3]) * pq.ms, 'positions': np.array([1, 2, 3]) * pq.cm}
-        h5w.add_to_h5(fn, data, overwrite_dataset=True)
-        # loading the whole data
-        res = h5w.load_h5(fn)
-        assert(res['times'].dimensionality == data['times'].dimensionality)
-
+        try:
+            import quantities as pq
+            data = {'times': np.array([1, 2, 3]) * pq.ms, 'positions':
+                    np.array([1, 2, 3]) * pq.cm}
+            h5w.add_to_h5(fn, data, overwrite_dataset=True)
+            # loading the whole data
+            res = h5w.load_h5(fn)
+            assert(res['times'].dimensionality == data['times'].dimensionality)
+        except ImportError:
+            pass
+            
     def test_store_and_load_with_compression(self):
         data = {'a': 1, 'test1': {'b': 2}, 'test2': {
             'test3': {'c': np.array([1, 2, 3])}}}
