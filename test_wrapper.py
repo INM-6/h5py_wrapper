@@ -207,11 +207,11 @@ class WrapperTest(unittest.TestCase):
         # loading the whole data
         res = h5w.load_h5(fn)
         for i in xrange(len(a)):
-            self.assertTrue(np.sum(a[i] - res['a'][i]) < 1e-12)
+            self.assertLess(np.sum(a[i] - res['a'][i]), 1e-12)
         # loading path directly
         res = h5w.load_h5(fn, path='a/')
         for i in xrange(len(a)):
-            self.assertTrue(np.sum(a[i] - res[i]) < 1e-12)
+            self.assertLess(np.sum(a[i] - res[i]), 1e-12)
 
     @unittest.skipUnless(quantities_found, 'No h5py_wrapper found.')
     def test_store_and_load_quantities_array(self):
