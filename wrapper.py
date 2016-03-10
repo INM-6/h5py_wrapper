@@ -59,6 +59,19 @@ def load_h5_old(filename, sep='_'):
     return dic
 
 
+# builds a nested dictionary out of a flattened dictionary
+def unflatten(dictionary, separator='_'):
+    resultDict = dict()
+    for key, value in dictionary.iteritems():
+        parts = key.split(separator)
+        d = resultDict
+        for part in parts[:-1]:
+            if part not in d:
+                d[part] = dict()
+            d = d[part]
+        d[parts[-1]] = value
+    return resultDict
+
 ######################################################################
 # b) New Version
 
