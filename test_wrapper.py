@@ -9,6 +9,13 @@ import wrapper as h5w
 import numpy as np
 from numpy.testing import assert_array_equal
 
+# check whether quantities is available
+try:
+    import quantities as pq
+    quantities_found = True
+except ImportError:
+    quantities_found = False
+
 fn = 'data.h5'
 
 # define data
@@ -206,17 +213,14 @@ class WrapperTest(unittest.TestCase):
         for i in xrange(len(a)):
             assert(np.sum(a[i] - res[i]) < 1e-12)
 
+    @unittest.skipUnless(quantities_found, 'No h5py_wrapper found.')
     def test_store_and_load_quantities_array(self):
-        try:
-            import quantities as pq
-            data = {'times': np.array([1, 2, 3]) * pq.ms, 'positions':
-                    np.array([1, 2, 3]) * pq.cm}
-            h5w.add_to_h5(fn, data, overwrite_dataset=True)
-            # loading the whole data
-            res = h5w.load_h5(fn)
-            assert(res['times'].dimensionality == data['times'].dimensionality)
-        except ImportError:
-            pass
+        data = {'times': np.array([1, 2, 3]) * pq.ms, 'positions':
+                np.array([1, 2, 3]) * pq.cm}
+        h5w.add_to_h5(fn, data, overwrite_dataset=True)
+        # loading the whole data
+        res = h5w.load_h5(fn)
+        assert(res['times'].dimensionality == data['times'].dimensionality)
             
     def test_store_and_load_with_compression(self):
         data = {'a': 1, 'test1': {'b': 2}, 'test2': {
