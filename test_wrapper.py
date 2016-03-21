@@ -260,4 +260,3 @@ class WrapperTest(unittest.TestCase):
         l = ['a', 'b']
         l2 = [unicode(n) for n in l]
         h5w.add_to_h5(fn, {'l': l2})
-
