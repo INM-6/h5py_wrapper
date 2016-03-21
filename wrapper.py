@@ -26,15 +26,15 @@ load_h5 : load nested dictionary from hdf5 file
 
 import os
 import re
-import h5py
-if int(re.sub('\.', '', h5py.version.version)) < 230:
-    raise ImportError("Using h5py version {version}. Version must "
-                      "be >= 2.3.0".format(version=h5py.version.version))
-
 import numpy as np
 import collections
 from subprocess import call
 import ast
+
+import h5py
+if int(re.sub('\.', '', h5py.version.version)) < 230:
+    raise ImportError("Using h5py version {version}. Version must "
+                      "be >= 2.3.0".format(version=h5py.version.version))
 
 # check whether quantities is available
 try:
@@ -86,7 +86,6 @@ def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
     >>> d['a'] = {'a1': [1, 2, 3], 'a2': 4., 'a3': {'a31': 'Test'}}
     >>> d['b'] = 'string'
     >>> h5w.add_to_h5('example.h5', d)
- 
     """
     try:
         f = h5py.File(filename, write_mode)
@@ -174,7 +173,7 @@ def _dict_to_h5(f, d, overwrite_dataset, compression=None, parent_group=None):
             group = f.require_group(group_name)
             _dict_to_h5(f, value, overwrite_dataset, parent_group=group,
                         compression=compression)
-            
+
             # explicitly store type of key
             group.attrs['_key_type'] = type(key).__name__
         else:
@@ -247,7 +246,7 @@ def _dict_from_h5(f, lazy=False):
             d[sub_name] = sub_d
         return name, d
 
-    
+
 def _load_dataset(f, lazy=False):
     """
     Loads the dataset of group f and returns its name and value.
@@ -287,7 +286,7 @@ def _evaluate_key(f):
         name = ast.literal_eval(name)
     return name
 
-        
+
 def _load_custom_shape(f):
     """
     Reshape array with unequal dimensions into original shape.
