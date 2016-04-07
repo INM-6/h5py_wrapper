@@ -7,4 +7,3 @@ Code status
 ===========
 
 [![Build Status](https://travis-ci.org/INM-6/python-dicthash.svg?branch=master)](https://travis-ci.org/INM-6/h5py_wrapper)
-
