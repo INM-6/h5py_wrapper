@@ -217,12 +217,21 @@ def _create_dataset(parent_group, key, value, compression=None):
         elif quantities_found and isinstance(value, pq.Quantity):
             dataset = parent_group.create_dataset(str(key), data=value)
             dataset.attrs['_unit'] = value.dimensionality.string
+        # To handle unicode strings
+        # Assumes that all entries of value are of the same data type
+        elif len(value) > 0 and isinstance(value[0], unicode):
+            value = [ii.encode('utf-8') for ii in value]
+            dataset = parent_group.create_dataset(
+                str(key), data=value, compression=compression)
         else:
             dataset = parent_group.create_dataset(
                 str(key), data=value, compression=compression)
     # ignore compression argument for scalar datasets
     elif not isinstance(value, collections.Iterable):
         dataset = parent_group.create_dataset(str(key), data=value)
+    elif isinstance(value, unicode):
+        dataset = parent_group.create_dataset(
+            str(key), data=value.encode('utf-8'), compression=compression)
     else:
         dataset = parent_group.create_dataset(
             str(key), data=value, compression=compression)

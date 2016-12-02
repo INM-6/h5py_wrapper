@@ -256,3 +256,8 @@ class WrapperTest(unittest.TestCase):
         self.assertIsNone(res['a'])
         self.assertIsNone(res['test1']['b'])
         self.assertIsNone(res['test2']['test3']['c'])
+
+    def test_write_unicode(self):
+        l = [u'a', u'b']
+        u = u'a'
+        h5w.add_to_h5(fn, {'l': l, 'u': u})
