@@ -275,3 +275,13 @@ def test_load_lazy_nested():
     assert(res['a'] is None)
     assert(res['test1']['b'] is None)
     assert(res['test2']['test3']['c'] is None)
+
+
+def test_file_close_on_exception():
+    res = {'a': 5}
+    h5w.save(fn, res, write_mode='w')
+    try:
+        h5w.save(fn, res, write_mode='a', overwrite_dataset=False)
+    except KeyError:
+        pass
+    h5w.save(fn, res, write_mode='w')
