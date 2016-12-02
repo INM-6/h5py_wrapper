@@ -221,7 +221,7 @@ def _create_dataset(parent_group, key, value, compression=None):
         # To handle unicode strings
         # Assumes that all entries of value are of the same data type
         elif len(value) > 0 and isinstance(value[0], unicode):
-            value = [ii.encode('utf8') for ii in value]
+            value = [ii.encode('utf-8') for ii in value]
             dataset = parent_group.create_dataset(
                 str(key), data=value, compression=compression)
         else:
@@ -232,7 +232,7 @@ def _create_dataset(parent_group, key, value, compression=None):
         dataset = parent_group.create_dataset(str(key), data=value)
     elif isinstance(value, unicode):
         dataset = parent_group.create_dataset(
-            str(key), data=value.encode('utf8'), compression=compression)
+            str(key), data=value.encode('utf-8'), compression=compression)
     else:
         dataset = parent_group.create_dataset(
             str(key), data=value, compression=compression)
