@@ -34,7 +34,7 @@ from subprocess import call
 import warnings
 
 # deprecation warnings are printed to sys.stdout
-warnings.simplefilter('always', category=DeprecationWarning)
+warnings.simplefilter('default', category=DeprecationWarning)
 
 # check whether quantities is available
 try:
