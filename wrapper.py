@@ -49,7 +49,7 @@ except ImportError:
 
 
 def save(filename, d, write_mode='a', overwrite_dataset=False,
-              resize=False, dict_label='', compression=None):
+         resize=False, dict_label='', compression=None):
     """
     Save a dictionary to an hdf5 file.
 
@@ -316,12 +316,14 @@ def _load_custom_shape(f):
 def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
               resize=False, dict_label='', compression=None):
     warnings.warn("Deprecated function name. This function "
-                  "will be removed in the next release. Please use save() instead.", DeprecationWarning)
+                  "will be removed in the next release. Please use save() instead.",
+                  DeprecationWarning)
     save(filename, d, write_mode=write_mode, overwrite_dataset=overwrite_dataset,
          resize=resize, dict_label=dict_label, compression=compression)
-    
+
 
 def load_h5(filename, path='', lazy=False):
     warnings.warn("Deprecated function name. This function "
-                  "will be removed in the next release. Please use load() instead.", DeprecationWarning)
+                  "will be removed in the next release. Please use load() instead.",
+                  DeprecationWarning)
     return load(filename, path=path, lazy=lazy)
