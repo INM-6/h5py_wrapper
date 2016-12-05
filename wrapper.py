@@ -24,17 +24,13 @@ load_h5 : load nested dictionary from hdf5 file
 
 """
 
+import ast
+import collections
+import h5py
+import numpy as np
 import os
 import re
-import numpy as np
-import collections
 from subprocess import call
-import ast
-
-import h5py
-if int(re.sub('\.', '', h5py.version.version)) < 230:
-    raise ImportError("Using h5py version {version}. Version must "
-                      "be >= 2.3.0".format(version=h5py.version.version))
 
 # check whether quantities is available
 try:
@@ -42,6 +38,11 @@ try:
     quantities_found = True
 except ImportError:
     quantities_found = False
+
+# make sure correct h5py version is available
+if int(re.sub('\.', '', h5py.version.version)) < 230:
+    raise ImportError("Using h5py version {version}. Version must "
+                      "be >= 2.3.0".format(version=h5py.version.version))
 
 
 def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
