@@ -100,17 +100,19 @@ def save(filename, d, write_mode='a', overwrite_dataset=False,
                       "accessability: Unable to open "
                       "file)".format(filename=filename))
     else:
-        if dict_label:
-            base = f.require_group(dict_label)
-            _dict_to_h5(f, d, overwrite_dataset, parent_group=base,
-                        compression=compression)
-        else:
-            _dict_to_h5(f, d, overwrite_dataset, compression=compression)
-        fname = f.filename
-        f.close()
-        if overwrite_dataset is True and resize is True:
-            call(['h5repack', '-i', fname, '-o', fname + '_repack'])
-            call(['mv', fname + '_repack', fname])
+        try:
+            if dict_label:
+                base = f.require_group(dict_label)
+                _dict_to_h5(f, d, overwrite_dataset, parent_group=base,
+                            compression=compression)
+            else:
+                _dict_to_h5(f, d, overwrite_dataset, compression=compression)
+        finally:  # make sure file is closed even if an exception is raised
+            fname = f.filename
+            f.close()
+            if overwrite_dataset is True and resize is True:
+                call(['h5repack', '-i', fname, '-o', fname + '_repack'])
+                call(['mv', fname + '_repack', fname])
 
 
 def load(filename, path='', lazy=False):
