@@ -86,7 +86,8 @@ def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
     >>> d = {}
     >>> d['a'] = {'a1': [1, 2, 3], 'a2': 4., 'a3': {'a31': 'Test'}}
     >>> d['b'] = 'string'
-    >>> h5w.add_to_h5('example.h5', d)
+    >>> import h5py_wrapper.wrapper as h5w
+    >>> h5w.add_to_h5('example_add.h5', d, overwrite_dataset=True)
     """
     try:
         f = h5py.File(filename, write_mode)
@@ -132,10 +133,10 @@ def load_h5(filename, path='', lazy=False):
     >>> d = {}
     >>> d['a'] = {'a1': [1, 2, 3], 'a2': 4., 'a3': {'a31': 'Test'}}
     >>> d['b'] = 'string'
-    >>> h5w.add_to_h5('example.h5', d)
-    >>> h5w.load_h5('example.h5')
-    {u'a': {u'a1': array([1, 2, 3]), u'a2': 4.0, u'a3': {u'a31': 'Test'}},
-    u'b': 'string'}
+    >>> import h5py_wrapper.wrapper as h5w
+    >>> h5w.add_to_h5('example_load.h5', d, overwrite_dataset=True)
+    >>> h5w.load_h5('example_load.h5')
+    {u'a': {u'a1': array([1, 2, 3]), u'a3': {u'a31': 'Test'}, u'a2': 4.0}, u'b': 'string'}
 
     """
     try:
