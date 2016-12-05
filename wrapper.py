@@ -19,8 +19,8 @@ loading the file.
 Functions
 ---------
 
-add_to_h5 : store nested dictionary in hdf5 file
-load_h5 : load nested dictionary from hdf5 file
+save : store nested dictionary in hdf5 file
+load : load nested dictionary from hdf5 file
 
 """
 
@@ -31,6 +31,10 @@ import numpy as np
 import os
 import re
 from subprocess import call
+import warnings
+
+# deprecation warnings are printed to sys.stdout
+warnings.simplefilter('default', category=DeprecationWarning)
 
 # check whether quantities is available
 try:
@@ -45,8 +49,8 @@ if int(re.sub('\.', '', h5py.version.version)) < 230:
                       "be >= 2.3.0".format(version=h5py.version.version))
 
 
-def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
-              resize=False, dict_label='', compression=None):
+def save(filename, d, write_mode='a', overwrite_dataset=False,
+         resize=False, dict_label='', compression=None):
     """
     Save a dictionary to an hdf5 file.
 
@@ -86,7 +90,7 @@ def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
     >>> d = {}
     >>> d['a'] = {'a1': [1, 2, 3], 'a2': 4., 'a3': {'a31': 'Test'}}
     >>> d['b'] = 'string'
-    >>> h5w.add_to_h5('example.h5', d)
+    >>> h5w.save('example.h5', d)
     """
     try:
         f = h5py.File(filename, write_mode)
@@ -108,7 +112,7 @@ def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
             call(['mv', fname + '_repack', fname])
 
 
-def load_h5(filename, path='', lazy=False):
+def load(filename, path='', lazy=False):
     """
     Loads a dictionary from an hdf5 file.
 
@@ -132,8 +136,8 @@ def load_h5(filename, path='', lazy=False):
     >>> d = {}
     >>> d['a'] = {'a1': [1, 2, 3], 'a2': 4., 'a3': {'a31': 'Test'}}
     >>> d['b'] = 'string'
-    >>> h5w.add_to_h5('example.h5', d)
-    >>> h5w.load_h5('example.h5')
+    >>> h5w.save('example.h5', d)
+    >>> h5w.load('example.h5')
     {u'a': {u'a1': array([1, 2, 3]), u'a2': 4.0, u'a3': {u'a31': 'Test'}},
     u'b': 'string'}
 
@@ -307,3 +311,20 @@ def _load_custom_shape(f):
         data_reshaped.append(np.array(f.value[counter:counter + l]))
         counter += l
     return np.array(data_reshaped, dtype=object)
+
+
+# Deprecated names for load and save routine
+def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
+              resize=False, dict_label='', compression=None):
+    warnings.warn("Deprecated function name. This function "
+                  "will be removed in the next release. Please use save() instead.",
+                  DeprecationWarning)
+    save(filename, d, write_mode=write_mode, overwrite_dataset=overwrite_dataset,
+         resize=resize, dict_label=dict_label, compression=compression)
+
+
+def load_h5(filename, path='', lazy=False):
+    warnings.warn("Deprecated function name. This function "
+                  "will be removed in the next release. Please use load() instead.",
+                  DeprecationWarning)
+    return load(filename, path=path, lazy=lazy)
