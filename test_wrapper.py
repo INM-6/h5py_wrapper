@@ -26,12 +26,12 @@ s0 = 'this is a test'
 l0i = [1, 2, 3, 4, 5]
 l0s = ['a', 'b', 'c']
 ll0 = [[6, 7, 8], [9, 10, 11]]
-# ln0 = [[12,13],[14,15,16]] #NESTED ARRAY FAILS DUE TO UNKOWN OBJECT TYPE
+ln0 = [[12, 13], [14, 15, 16]]
 
 t0i = (1, 2, 3, 4, 5)
 t0s = ('a', 'b', 'c')
 tt0 = ((6, 7, 8), (9, 10, 11))
-
+tn0 = ((1, 2), (3, 4, 5))
 
 d0 = {'i': i0, 'f': f0, 's': s0}
 dn0 = {'d1': d0, 'd2': d0}
@@ -43,14 +43,14 @@ simpledata_val = [i0, f0, s0]
 arraydata_str = ['ai', 'as', 'm']
 arraydata_val = [np.array(l0i), np.array(l0s), np.array(ll0)]
 
-listdata_str = ['li', 'ls', 'm']
-listdata_val = [l0i, l0s, ll0]
+listdata_str = ['li', 'ls', 'm', 'ln']
+listdata_val = [l0i, l0s, ll0, ln0]
 
 dictdata_str = ['d']
 dictdata_val = [d0]
 
-tupledata_str = ['ti', 'tf', 'ts']
-tupledata_val = [t0i, t0s, tt0]
+tupledata_str = ['ti', 'tf', 'ts', 'tn']
+tupledata_val = [t0i, t0s, tt0, tn0]
 
 
 def _construct_simpledata():
