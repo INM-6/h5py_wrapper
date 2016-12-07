@@ -111,7 +111,14 @@ def test_store_and_load_listdata():
     res.clear()
     res = h5w.load(fn)
     for key, val in zip(listdata_str, listdata_val):
-        assert_array_equal(res[key], val)
+        if isinstance(val[0], list):
+            for ii in xrange(len(val)):
+                assert(isinstance(res[key][ii], list))
+                assert_array_equal(res[key][ii], val[ii])
+        else:
+            print type(val), type(res[key])
+            assert(isinstance(res[key], type(val)))
+            assert_array_equal(res[key], val)
 
 
 def test_store_and_load_tupledata():
@@ -122,6 +129,7 @@ def test_store_and_load_tupledata():
     res.clear()
     res = h5w.load(fn)
     for key, val in zip(tupledata_str, tupledata_val):
+        assert(isinstance(res[key], tuple))
         assert_array_equal(res[key], np.array(val))
 
 
@@ -217,16 +225,16 @@ def test_handle_nonexisting_file():
 
 
 def test_store_and_load_custom_array():
-    a = [[1, 2, 3, 4], [6, 7]]
+    a = np.array([[1, 2, 3, 4], [6, 7]])
     h5w.save(fn, {'a': a}, overwrite_dataset=True)
     # loading the whole data
     res = h5w.load(fn)
     for i in xrange(len(a)):
-        assert(abs(np.sum(a[i] - res['a'][i])) < 1e-12)
+        assert_array_equal(a[i], res['a'][i])
     # loading path directly
     res = h5w.load(fn, path='a/')
     for i in xrange(len(a)):
-        assert(abs(np.sum(a[i] - res[i])) < 1e-12)
+        assert_array_equal(a[i], res[i])
 
 
 @pytest.mark.skipif(not quantities_found, reason='quantities module not found.')
