@@ -342,6 +342,9 @@ def _cast_value_type(value, value_type, unit=None):
 
 
 def _array_to_type(value, value_type):
+    """
+    Casts members of arrays to the specified type in an iterative fashion.
+    """
     if len(value) > 0 and isinstance(value[0], np.ndarray):
         return eval(valuetype_dict[value_type])(_array_to_type(i, value_type) for i in value)
     else:
