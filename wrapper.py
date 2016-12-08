@@ -276,7 +276,7 @@ def _load_dataset(f, lazy=False):
         return None
     else:
         if hasattr(f, 'value'):
-            if str(f.value) == 'None':
+            if f.attrs['_value_type'] == 'NoneType':
                 return None
             else:
                 if (len(f.attrs.keys()) > 0 and
