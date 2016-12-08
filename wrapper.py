@@ -310,8 +310,9 @@ def _load_custom_shape(f):
     """
     data_reshaped = []
     counter = 0
+    value = f.value
     for l in f.attrs['oldshape']:
-        data_reshaped.append(np.array(f.value[counter:counter + l]))
+        data_reshaped.append(np.array(value[counter:counter + l]))
         counter += l
     return np.array(data_reshaped, dtype=object)
 
