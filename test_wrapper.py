@@ -4,6 +4,9 @@ Unit and integration tests for the h5py_wrapper module
 
 """
 
+import os
+import urllib
+import tarfile
 import numpy as np
 from numpy.testing import assert_array_equal
 import pytest
@@ -293,3 +296,22 @@ def test_file_close_on_exception():
     except KeyError:
         pass
     h5w.save(fn, res, write_mode='w')
+
+    
+def test_conversion_script():
+    try:
+        import h5py_wrapper_001.wrapper as h5w_001
+    except ImportError:
+        urllib.urlretrieve("https://github.com/INM-6/h5py_wrapper/archive/v0.0.1.tar.gz",
+                           filename='./v0.0.1.tar.gz')
+        f = tarfile.open('v0.0.1.tar.gz')
+        f.extract('h5py_wrapper-0.0.1/wrapper.py')
+        f.extract('h5py_wrapper-0.0.1/__init__.py')
+        os.rename('h5py_wrapper-0.0.1', 'h5py_wrapper_001')
+        import h5py_wrapper_001.wrapper as h5w_001
+        
+    res = {key: value for key, value in zip(simpledata_str, simpledata_val)}
+    res.update({key: value for key, value in zip(arraydata_str, arraydata_val)})
+    h5w_001.add_to_h5(fn, res)
+    os.system('./convert_h5file.py data.h5')
+    res = h5w.load('data.h5')
