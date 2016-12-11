@@ -309,11 +309,9 @@ def _load_custom_shape(f):
     Reshape array with unequal dimensions into original shape.
     """
     data_reshaped = []
-    counter = 0
     value = f.value
-    for l in f.attrs['oldshape']:
+    for counter, l in _accumulate(f.attrs['oldshape']):
         data_reshaped.append(np.array(value[counter:counter + l]))
-        counter += l
     return np.array(data_reshaped, dtype=object)
 
 
@@ -332,3 +330,15 @@ def load_h5(filename, path='', lazy=False):
                   "will be removed in the next release. Please use load() instead.",
                   DeprecationWarning)
     return load(filename, path=path, lazy=lazy)
+
+
+# Helper function
+def _accumulate(iterator):
+    """
+    Create a generator to iterate over the accumulated
+    values of the given iterator.
+    """
+    total = 0
+    for item in iterator:
+        yield total, item
+        total += item
