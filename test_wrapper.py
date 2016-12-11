@@ -308,7 +308,7 @@ def test_conversion_script():
     res = {key: value for key, value in zip(simpledata_str, simpledata_val)}
     res.update({key: value for key, value in zip(arraydata_str, arraydata_val)})
     h5w_001.add_to_h5(fn, res)
-    os.system('./convert_h5file.py data.h5')
+    os.system('./convert_h5file.py data.h5 --release=0.0.1')
     res2 = h5w.load('data.h5')
     for key, value in res.items():
         assert(isinstance(res2[key], type(value)))

@@ -5,20 +5,22 @@
 Conversion script to convert files from release
 version 0.0.1 to 1.0.
 
-Usage: convert_h5file [-h|--help] <filename> [--save-backup] [-v|--verbose]
+Usage: convert_h5file [-h|--help] <filename> [--save-backup] [-v|--verbose] [--release=<version>]
 
 Options:
-    --save-backup   save backup version of file in old file format [default: False].
+    --release=<version>   release version used to create the file to be converted [default: 0.0.1]
+    --save-backup  save backup version of file in old file format [default: False].
     -v, --verbose  print informative output to screen
-    -h, --help      print this text
+    -h, --help     print this text
 '''
 
 import docopt
 import wrapper as h5w
-import urllib
+import requests
 import tarfile
 import numpy as np
 import os
+import importlib
 
 
 def dict_check_for_numpy_types(d):
@@ -36,28 +38,34 @@ def dict_check_for_numpy_types(d):
             
 def get_previous_version(version):
     base_url = "https://github.com/INM-6/h5py_wrapper/archive/v"
-    urllib.urlretrieve(''.join((base_url, version, ".tar.gz")),
-                       filename=''.join((os.getcwd(), version, '.tar.gz')))
-
-    with tarfile.open(''.join(('v', version, '.tar.gz'))) as f:
-        f.extract(''.join(('h5py_wrapper-', version, '/wrapper.py')))
-        f.extract(''.join(('h5py_wrapper-', version, '/__init__.py')))
-    os.rename('-'.join(('h5py_wrapper', version)),
-              '_'.join(('h5py_wrapper', version.replace('.', ''))))
-
+    r = requests.get(''.join((base_url, version, ".tar.gz")))
+    try:
+        r.raise_for_status()
+        fn = ''.join((os.path.join(os.getcwd(), version), '.tar.gz'))
+        with open(fn, 'wb') as f:
+            f.write(r.content)
+        with tarfile.open(fn) as f:
+            f.extract(''.join(('h5py_wrapper-', version, '/wrapper.py')))
+            f.extract(''.join(('h5py_wrapper-', version, '/__init__.py')))
+        os.rename('-'.join(('h5py_wrapper', version)),
+                  '_'.join(('h5py_wrapper', version.replace('.', ''))))
+    except requests.exceptions.HTTPError:
+        raise ImportError("Requested release version does not exist.")
 
 if __name__ == '__main__':
-    # First get 0.0.1 release version
-    try:
-        import h5py_wrapper_001.wrapper as h5w_001
-    except ImportError:
-        get_previous_version('0.0.1')
-        import h5py_wrapper_001.wrapper as h5w_001
-
     args = docopt.docopt(__doc__)
+    # First get release version used to create the file to be converted
+    version_stripped = args['--release'].replace('.', '')
+    release_base_name = '_'.join(('h5py_wrapper', version_stripped))
+    try:
+        h5w_old = importlib.import_module('.'.join((release_base_name, 'wrapper')))
+    except ImportError:
+        get_previous_version(args['--release'])
+        h5w_old = importlib.import_module('.'.join((release_base_name, 'wrapper')))
+
     if args['--verbose']:
         print("Loading file.")
-    d = h5w_001.load_h5(args['<filename>'])
+    d = h5w_old.load_h5(args['<filename>'])
 
     # This step is necessary because the 0.0.1 release loads int and float types as numpy datatypes,
     # which are not supported as scalar datatypes by the 1.0 release version.
@@ -70,7 +78,7 @@ if __name__ == '__main__':
         if args['--verbose']:
             print("Saving backup file.")
         orig_name = os.path.splitext(args['<filename>'])
-        backup_name = orig_name[0] + '_001.' + orig_name[1]
+        backup_name = '.'.join((''.join((orig_name[0], version_stripped)), orig_name[1]))
         os.rename(args['<filename>'], backup_name)
 
     if args['--verbose']:
