@@ -20,29 +20,38 @@ import tarfile
 import numpy as np
 import os
 
-if __name__ == '__main__':
-    def dict_check_for_numpy_types(d):
-        '''
-        Convert all numpy datatypes to default datatypes in a dictionary.
-        '''
-        for key, value in d.items():
-            if isinstance(value, dict):
-                dict_check_for_numpy_types(value)
-            elif isinstance(value, (np.int)):
-                d[key] = int(value)
-            elif isinstance(value, (np.float)):
-                d[key] = float(value)
 
+def dict_check_for_numpy_types(d):
+    '''
+    Convert all numpy datatypes to default datatypes in a dictionary.
+    '''
+    for key, value in d.items():
+        if isinstance(value, dict):
+            dict_check_for_numpy_types(value)
+        elif isinstance(value, (np.int)):
+            d[key] = int(value)
+        elif isinstance(value, (np.float)):
+            d[key] = float(value)
+
+            
+def get_previous_version(version):
+    base_url = "https://github.com/INM-6/h5py_wrapper/archive/v"
+    urllib.urlretrieve(''.join((base_url, version, ".tar.gz")),
+                       filename=''.join((os.getcwd(), version, '.tar.gz')))
+
+    with tarfile.open(''.join(('v', version, '.tar.gz'))) as f:
+        f.extract(''.join(('h5py_wrapper-', version, '/wrapper.py')))
+        f.extract(''.join(('h5py_wrapper-', version, '/__init__.py')))
+    os.rename('-'.join(('h5py_wrapper', version)),
+              '_'.join(('h5py_wrapper', version.replace('.', ''))))
+
+
+if __name__ == '__main__':
     # First get 0.0.1 release version
     try:
         import h5py_wrapper_001.wrapper as h5w_001
     except ImportError:
-        urllib.urlretrieve("https://github.com/INM-6/h5py_wrapper/archive/v0.0.1.tar.gz",
-                           filename='./v0.0.1.tar.gz')
-        f = tarfile.open('v0.0.1.tar.gz')
-        f.extract('h5py_wrapper-0.0.1/wrapper.py')
-        f.extract('h5py_wrapper-0.0.1/__init__.py')
-        os.rename('h5py_wrapper-0.0.1', 'h5py_wrapper_001')
+        get_previous_version('0.0.1')
         import h5py_wrapper_001.wrapper as h5w_001
 
     args = docopt.docopt(__doc__)
@@ -60,7 +69,8 @@ if __name__ == '__main__':
     if args['--save-backup']:
         if args['--verbose']:
             print("Saving backup file.")
-        backup_name = args['<filename>'].split('.')[0] + '_001.' + args['<filename>'].split('.')[1]
+        orig_name = os.path.splitext(args['<filename>'])
+        backup_name = orig_name[0] + '_001.' + orig_name[1]
         os.rename(args['<filename>'], backup_name)
 
     if args['--verbose']:

@@ -284,7 +284,7 @@ def _load_dataset(f, lazy=False):
                     return _load_custom_shape(f)
                 elif '_unit' in f.attrs.keys():
                     return _cast_value_type(f.value, f.attrs['_value_type'],
-                                             unit=f.attrs['_unit'])
+                                            unit=f.attrs['_unit'])
                 else:
                     return _cast_value_type(f.value, f.attrs['_value_type'])
         else:
@@ -330,7 +330,7 @@ def _cast_value_type(value, value_type, unit=None):
                                   "please install the package and "
                                   "reload the wrapper.")
         else:
-            if valuetype_dict[value_type] == 'list' and type(value) == np.ndarray:
+            if valuetype_dict[value_type] == 'list' and isinstance(value, np.ndarray):
                 # ensures that all dimensions of the array are converted to lists
                 value = value.tolist()
             else:
