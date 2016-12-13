@@ -308,12 +308,12 @@ def _load_custom_shape(f):
     """
     data_reshaped = []
     counter = 0
-    for i in xrange(len(f.attrs['oldshape'])):
-        l = f.attrs['oldshape'][i]
-        value = _cast_value_type(f.value[counter:counter + l],
-                                 f.attrs['custom_value_types'][i])
-        data_reshaped.append(value)
-        counter += l
+    value = f.value
+    for (j, i), value_type in zip(_accumulate(f.attrs['oldshape']),
+                                  f.attrs['custom_value_types']):
+        cast_value = _cast_value_type(value[j:j + i],
+                                      value_type)
+        data_reshaped.append(cast_value)
     return np.array(data_reshaped, dtype=object)
 
 
@@ -366,3 +366,15 @@ def load_h5(filename, path='', lazy=False):
                   "will be removed in the next release. Please use load() instead.",
                   DeprecationWarning)
     return load(filename, path=path, lazy=lazy)
+
+
+# Helper function
+def _accumulate(iterator):
+    """
+    Create a generator to iterate over the accumulated
+    values of the given iterator.
+    """
+    total = 0
+    for item in iterator:
+        yield total, item
+        total += item
