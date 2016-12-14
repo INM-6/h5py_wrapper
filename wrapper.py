@@ -307,7 +307,6 @@ def _load_custom_shape(f):
     Reshape array with unequal dimensions into original shape.
     """
     data_reshaped = []
-    counter = 0
     value = f.value
     for (j, i), value_type in zip(_accumulate(f.attrs['oldshape']),
                                   f.attrs['custom_value_types']):

@@ -5,8 +5,6 @@ Unit and integration tests for the h5py_wrapper module
 """
 
 import os
-import urllib
-import tarfile
 import numpy as np
 from numpy.testing import assert_array_equal
 import pytest
