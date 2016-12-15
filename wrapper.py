@@ -272,25 +272,22 @@ def _load_dataset(f, lazy=False):
     if lazy:
         return None
     else:
-        if hasattr(f, 'value'):
-            if str(f.value) == 'None':
-                return None
-            else:
-                if (len(f.attrs.keys()) > 0 and
-                        'custom_shape' in f.attrs.keys()):
-                    return _load_custom_shape(f)
-                elif '_unit' in f.attrs.keys():
-                    if quantities_found:
-                        return pq.Quantity(
-                            f.value, f.attrs['_unit'])
-                    else:
-                        raise ImportError("Could not find quantities package, "
-                                          "please install the package and "
-                                          "reload the wrapper.")
-                else:
-                    return f.value
+        if str(f.value) == 'None':
+            return None
         else:
-            return np.array([])
+            if (len(f.attrs.keys()) > 0 and
+                    'custom_shape' in f.attrs.keys()):
+                return _load_custom_shape(f)
+            elif '_unit' in f.attrs.keys():
+                if quantities_found:
+                    return pq.Quantity(
+                        f.value, f.attrs['_unit'])
+                else:
+                    raise ImportError("Could not find quantities package, "
+                                      "please install the package and "
+                                      "reload the wrapper.")
+            else:
+                return f.value
 
 
 def _evaluate_key(f):
