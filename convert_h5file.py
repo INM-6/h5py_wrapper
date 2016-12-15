@@ -82,7 +82,7 @@ if __name__ == '__main__':
             if args['--verbose']:
                 print("Saving backup file.")
             orig_name = os.path.splitext(fn)
-            backup_name = '.'.join((''.join((orig_name[0], version_stripped)), orig_name[1]))
+            backup_name = ''.join(('_'.join((orig_name[0], version_stripped)), orig_name[1]))
             os.rename(fn, backup_name)
 
         if args['--verbose']:
