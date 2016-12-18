@@ -2,8 +2,8 @@
 # encoding: utf8
 
 """
-Conversion script to convert files from release
-version 0.0.1 to 1.0.
+Conversion script to convert files from a previous
+release version to the current version.
 
 Usage: convert_h5file [-h|--help] [<files>...] [--save-backup] [-v|--verbose] [--release=<version>]
 
