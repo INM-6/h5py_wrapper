@@ -13,7 +13,7 @@ before_install:
   - conda update --yes conda
   - pip install --upgrade pip
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy h5py
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy h5py==2.3.1
   - pip install --upgrade quantities pytest
   - pip install docopt
 script:
