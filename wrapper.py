@@ -44,9 +44,9 @@ except ImportError:
     quantities_found = False
 
 # make sure correct h5py version is available
-if int(re.sub('\.', '', h5py.version.version)) < 230:
+if int(re.sub('\.', '', h5py.version.version)) < 231:
     raise ImportError("Using h5py version {version}. Version must "
-                      "be >= 2.3.0".format(version=h5py.version.version))
+                      "be >= 2.3.1".format(version=h5py.version.version))
 
 
 def save(filename, d, write_mode='a', overwrite_dataset=False,
