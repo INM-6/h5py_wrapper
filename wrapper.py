@@ -275,27 +275,24 @@ def _load_dataset(f, lazy=False):
     if lazy:
         return None
     else:
-        if hasattr(f, 'value'):
-            try:
-                value_type = f.attrs['_value_type']
-            except KeyError:
-                raise KeyError("No value type stored. This file has "
-                               "probably been created with a previous release version. "
-                               "Please use the conversion script to convert your "
-                               "file.")
-            if value_type == 'NoneType':
-                return None
-            else:
-                if (len(f.attrs.keys()) > 0 and
-                        'custom_shape' in f.attrs.keys()):
-                    return _load_custom_shape(f)
-                elif '_unit' in f.attrs.keys():
-                    return _cast_value_type(f.value, value_type,
-                                            unit=f.attrs['_unit'])
-                else:
-                    return _cast_value_type(f.value, value_type)
+        try:
+            value_type = f.attrs['_value_type']
+        except KeyError:
+            raise KeyError("No value type stored. This file has "
+                           "probably been created with a previous release version. "
+                           "Please use the conversion script to convert your "
+                           "file.")
+        if value_type == 'NoneType':
+            return None
         else:
-            return np.array([])
+            if (len(f.attrs.keys()) > 0 and
+                    'custom_shape' in f.attrs.keys()):
+                return _load_custom_shape(f)
+            elif '_unit' in f.attrs.keys():
+                return _cast_value_type(f.value, value_type,
+                                        unit=f.attrs['_unit'])
+            else:
+                return _cast_value_type(f.value, value_type)
 
 
 def _evaluate_key(f):
