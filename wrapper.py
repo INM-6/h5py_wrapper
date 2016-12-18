@@ -206,7 +206,7 @@ def _create_dataset(parent_group, key, value, compression=None):
     if value is None:  # h5py cannot store NoneType.
         dataset = parent_group.create_dataset(
             str(key), data='None', compression=compression)
-    elif isinstance(value, (list, np.ndarray)):
+    elif isinstance(value, (list, np.ndarray, tuple)):
         if np.array(value).dtype.name == 'object':
             # We store 2d arrays with unequal dimensions by reducing
             # it to a 1d array and additionally storing the original shape.
@@ -320,7 +320,7 @@ def _load_custom_shape(f):
         cast_value = _cast_value_type(value[j:j + i],
                                       value_type)
         data_reshaped.append(cast_value)
-    return np.array(data_reshaped, dtype=object)
+    return eval(valuetype_dict[value_type])(data_reshaped)
 
 
 def _cast_value_type(value, value_type, unit=None):
@@ -336,9 +336,9 @@ def _cast_value_type(value, value_type, unit=None):
                                   "please install the package and "
                                   "reload the wrapper.")
         else:
-            if valuetype_dict[value_type] == 'list' and isinstance(value, np.ndarray):
-                # ensures that all dimensions of the array are converted to lists
-                value = value.tolist()
+            if value_type in ['list', 'tuple']:
+                # ensures that all dimensions of the array are converted to the correct value type
+                value = _array_to_type(value, value_type)
             else:
                 value = eval(valuetype_dict[value_type])(value)
         return value
@@ -346,6 +346,15 @@ def _cast_value_type(value, value_type, unit=None):
         raise NotImplementedError("Unsupported data type: "
                                   "{value_type}.".format(value_type=value_type))
 
+
+def _array_to_type(value, value_type):
+    """
+    Casts members of arrays to the specified type in an iterative fashion.
+    """
+    if len(value) > 0 and isinstance(value[0], np.ndarray):
+        return eval(valuetype_dict[value_type])(_array_to_type(i, value_type) for i in value)
+    else:
+        return eval(valuetype_dict[value_type])(value)
 
 # Look-up table with supported datatypes
 valuetype_dict = {'tuple': 'tuple',
