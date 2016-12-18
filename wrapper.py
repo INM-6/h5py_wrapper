@@ -336,7 +336,7 @@ def _cast_value_type(value, value_type, unit=None):
                                   "please install the package and "
                                   "reload the wrapper.")
         else:
-            if value_type in ['list', 'tuple'] and isinstance(value, np.ndarray):
+            if value_type in ['list', 'tuple']:
                 # ensures that all dimensions of the array are converted to the correct value type
                 value = _array_to_type(value, value_type)
             else:
