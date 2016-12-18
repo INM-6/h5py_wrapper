@@ -206,9 +206,9 @@ def _create_dataset(parent_group, key, value, compression=None):
     if value is None:  # h5py cannot store NoneType.
         dataset = parent_group.create_dataset(
             str(key), data='None', compression=compression)
-    elif isinstance(value, (list, np.ndarray)):
+    elif isinstance(value, (list, np.ndarray, tuple)):
         if np.array(value).dtype.name == 'object':
-            # We store 2d array with unequal dimensions by reducing
+            # We store 2d arrays with unequal dimensions by reducing
             # it to a 1d array and additionally storing the original shape.
             # This does not work for more than two dimensions.
             if len(np.shape(value)) > 1:
@@ -217,11 +217,13 @@ def _create_dataset(parent_group, key, value, compression=None):
                                      parent_group.name, key)))
             else:
                 oldshape = np.array([len(x) for x in value])
+                value_types = [type(x).__name__ for x in value]
                 data_reshaped = np.hstack(value)
                 dataset = parent_group.create_dataset(
                     str(key), data=data_reshaped, compression=compression)
                 dataset.attrs['oldshape'] = oldshape
                 dataset.attrs['custom_shape'] = True
+                dataset.attrs['custom_value_types'] = value_types
         elif quantities_found and isinstance(value, pq.Quantity):
             dataset = parent_group.create_dataset(str(key), data=value)
             dataset.attrs['_unit'] = value.dimensionality.string
@@ -244,8 +246,9 @@ def _create_dataset(parent_group, key, value, compression=None):
         dataset = parent_group.create_dataset(
             str(key), data=value, compression=compression)
 
-    # explicitly store type of key
+    # explicitly store type of key and value
     dataset.attrs['_key_type'] = type(key).__name__
+    dataset.attrs['_value_type'] = type(value).__name__
 
 
 def _dict_from_h5(f, lazy=False):
@@ -272,22 +275,24 @@ def _load_dataset(f, lazy=False):
     if lazy:
         return None
     else:
-        if str(f.value) == 'None':
+        try:
+            value_type = f.attrs['_value_type']
+        except KeyError:
+            raise KeyError("No value type stored. This file has "
+                           "probably been created with a previous release version. "
+                           "Please use the conversion script to convert your "
+                           "file.")
+        if value_type == 'NoneType':
             return None
         else:
             if (len(f.attrs.keys()) > 0 and
                     'custom_shape' in f.attrs.keys()):
                 return _load_custom_shape(f)
             elif '_unit' in f.attrs.keys():
-                if quantities_found:
-                    return pq.Quantity(
-                        f.value, f.attrs['_unit'])
-                else:
-                    raise ImportError("Could not find quantities package, "
-                                      "please install the package and "
-                                      "reload the wrapper.")
+                return _cast_value_type(f.value, value_type,
+                                        unit=f.attrs['_unit'])
             else:
-                return f.value
+                return _cast_value_type(f.value, value_type)
 
 
 def _evaluate_key(f):
@@ -307,9 +312,55 @@ def _load_custom_shape(f):
     """
     data_reshaped = []
     value = f.value
-    for counter, l in _accumulate(f.attrs['oldshape']):
-        data_reshaped.append(np.array(value[counter:counter + l]))
-    return np.array(data_reshaped, dtype=object)
+    for (j, i), value_type in zip(_accumulate(f.attrs['oldshape']),
+                                  f.attrs['custom_value_types']):
+        cast_value = _cast_value_type(value[j:j + i],
+                                      value_type)
+        data_reshaped.append(cast_value)
+    return eval(valuetype_dict[value_type])(data_reshaped)
+
+
+def _cast_value_type(value, value_type, unit=None):
+    """
+    Casts value into the correct type defined in attrs.
+    """
+    if value_type in valuetype_dict:
+        if unit:
+            if quantities_found:
+                value = eval(valuetype_dict[value_type])(value, unit)
+            else:
+                raise ImportError("Could not find quantities package, "
+                                  "please install the package and "
+                                  "reload the wrapper.")
+        else:
+            if value_type in ['list', 'tuple']:
+                # ensures that all dimensions of the array are converted to the correct value type
+                value = _array_to_type(value, value_type)
+            else:
+                value = eval(valuetype_dict[value_type])(value)
+        return value
+    else:
+        raise NotImplementedError("Unsupported data type: "
+                                  "{value_type}.".format(value_type=value_type))
+
+
+def _array_to_type(value, value_type):
+    """
+    Casts members of arrays to the specified type in an iterative fashion.
+    """
+    if len(value) > 0 and isinstance(value[0], np.ndarray):
+        return eval(valuetype_dict[value_type])(_array_to_type(i, value_type) for i in value)
+    else:
+        return eval(valuetype_dict[value_type])(value)
+
+# Look-up table with supported datatypes
+valuetype_dict = {'tuple': 'tuple',
+                  'ndarray': 'np.array',
+                  'list': 'list',
+                  'float': 'float',
+                  'int': 'int',
+                  'str': 'str',
+                  'Quantity': 'pq.Quantity'}
 
 
 # Deprecated names for load and save routine
