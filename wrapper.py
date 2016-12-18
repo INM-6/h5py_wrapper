@@ -276,17 +276,24 @@ def _load_dataset(f, lazy=False):
         return None
     else:
         if hasattr(f, 'value'):
-            if str(f.value) == 'None':
+            try:
+                value_type = f.attrs['_value_type']
+            except KeyError:
+                raise KeyError("No value type stored. This file has "
+                               "probably been created with a previous release version. "
+                               "Please use the conversion script to convert your "
+                               "file.")
+            if value_type == 'NoneType':
                 return None
             else:
                 if (len(f.attrs.keys()) > 0 and
                         'custom_shape' in f.attrs.keys()):
                     return _load_custom_shape(f)
                 elif '_unit' in f.attrs.keys():
-                    return _cast_value_type(f.value, f.attrs['_value_type'],
+                    return _cast_value_type(f.value, value_type,
                                             unit=f.attrs['_unit'])
                 else:
-                    return _cast_value_type(f.value, f.attrs['_value_type'])
+                    return _cast_value_type(f.value, value_type)
         else:
             return np.array([])
 
@@ -307,14 +314,13 @@ def _load_custom_shape(f):
     Reshape array with unequal dimensions into original shape.
     """
     data_reshaped = []
-    counter = 0
-    for i in xrange(len(f.attrs['oldshape'])):
-        l = f.attrs['oldshape'][i]
-        value = _cast_value_type(f.value[counter:counter + l],
-                                 f.attrs['custom_value_types'][i])
-        data_reshaped.append(value)
-        counter += l
-    return eval(valuetype_dict[f.attrs['_value_type']])(data_reshaped)
+    value = f.value
+    for (j, i), value_type in zip(_accumulate(f.attrs['oldshape']),
+                                  f.attrs['custom_value_types']):
+        cast_value = _cast_value_type(value[j:j + i],
+                                      value_type)
+        data_reshaped.append(cast_value)
+    return eval(valuetype_dict[value_type])(data_reshaped)
 
 
 def _cast_value_type(value, value_type, unit=None):
@@ -375,3 +381,15 @@ def load_h5(filename, path='', lazy=False):
                   "will be removed in the next release. Please use load() instead.",
                   DeprecationWarning)
     return load(filename, path=path, lazy=lazy)
+
+
+# Helper function
+def _accumulate(iterator):
+    """
+    Create a generator to iterate over the accumulated
+    values of the given iterator.
+    """
+    total = 0
+    for item in iterator:
+        yield total, item
+        total += item

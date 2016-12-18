@@ -4,10 +4,12 @@ Unit and integration tests for the h5py_wrapper module
 
 """
 
+import os
 import numpy as np
 from numpy.testing import assert_array_equal
 import pytest
 import wrapper as h5w
+from convert_h5file import _get_previous_version
 
 # check whether quantities is available
 try:
@@ -17,6 +19,7 @@ except ImportError:
     quantities_found = False
 
 fn = 'data.h5'
+fn2 = 'data2.h5'
 
 # define data
 i0 = 6
@@ -116,7 +119,6 @@ def test_store_and_load_listdata():
                 assert(isinstance(res[key][ii], list))
                 assert_array_equal(res[key][ii], val[ii])
         else:
-            print type(val), type(res[key])
             assert(isinstance(res[key], type(val)))
             assert_array_equal(res[key], val)
 
@@ -293,3 +295,30 @@ def test_file_close_on_exception():
     except KeyError:
         pass
     h5w.save(fn, res, write_mode='w')
+
+
+def test_conversion_script():
+    try:
+        import h5py_wrapper_001.wrapper as h5w_001
+    except ImportError:
+        _get_previous_version('0.0.1')
+        import h5py_wrapper_001.wrapper as h5w_001
+
+    res = {key: value for key, value in zip(simpledata_str, simpledata_val)}
+    res.update({key: value for key, value in zip(arraydata_str, arraydata_val)})
+    h5w_001.add_to_h5(fn, res)
+    h5w_001.add_to_h5(fn2, res)
+    with open('conversion_list.txt', 'w') as f:
+        f.write(fn)
+        f.write('\n')
+        f.write(fn2)
+    # Specify list on command line
+    os.system('./convert_h5file.py {} {} --release=0.0.1'.format(fn, fn2))
+    # Read list of files from file and pipe into conversion script
+    os.system('cat conversion_list.txt | ./convert_h5file.py --release=0.0.1')
+    # Find files based on pattern using `find` and pipe into conversion script
+    os.system('find -name "data*.h5" | ./convert_h5file.py --release=0.0.1')
+
+    res2 = h5w.load('data.h5')
+    for key, value in res.items():
+        assert(isinstance(res2[key], type(value)))
