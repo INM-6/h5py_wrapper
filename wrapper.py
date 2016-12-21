@@ -360,6 +360,7 @@ valuetype_dict = {'tuple': 'tuple',
                   'float': 'float',
                   'int': 'int',
                   'str': 'str',
+                  'bool': 'bool',
                   'Quantity': 'pq.Quantity'}
 
 

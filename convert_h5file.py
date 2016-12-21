@@ -36,6 +36,8 @@ def _dict_check_for_numpy_types(d):
             d[key] = int(value)
         elif isinstance(value, (np.float)):
             d[key] = float(value)
+        elif isinstance(value, (np.bool_)):
+            d[key] = bool(value)
 
 
 def _get_previous_version(version):
