@@ -22,6 +22,22 @@ API reference
 	   
    api_reference
 
+
+Supported data types
+====================
+.. toctree::
+   :maxdepth: 2
+	   
+   supported_datatypes
+
+Conversion from old releases
+============================
+.. toctree::
+   :maxdepth: 2
+
+   conversion
+
+
 Indices and tables
 ==================
 
