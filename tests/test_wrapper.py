@@ -58,6 +58,9 @@ tupledata_str = ['ti', 'tf', 'ts', 'tn']
 tupledata_val = [t0i, t0s, tt0, tn0]
 
 
+pytestmark = pytest.mark.usefixtures("cleanup")
+
+
 def _construct_simpledata():
     res = {}
     for key, val in zip(simpledata_str, simpledata_val):
@@ -324,3 +327,17 @@ def test_conversion_script():
     res2 = h5w.load('data.h5')
     for key, value in res.items():
         assert(isinstance(res2[key], type(value)))
+
+
+@pytest.fixture()
+def cleanup():
+    yield
+    try:
+        os.remove(fn)
+    except OSError:
+        pass
+
+    try:
+        os.remove(fn2)
+    except OSError:
+        pass
