@@ -58,6 +58,9 @@ tupledata_str = ['ti', 'tf', 'ts', 'tn']
 tupledata_val = [t0i, t0s, tt0, tn0]
 
 
+pytestmark = pytest.mark.usefixtures("cleanup")
+
+
 def _construct_simpledata():
     res = {}
     for key, val in zip(simpledata_str, simpledata_val):
@@ -318,9 +321,24 @@ def test_conversion_script():
     os.system('./convert_h5file.py {} {} --release=0.0.1'.format(fn, fn2))
     # Read list of files from file and pipe into conversion script
     os.system('cat conversion_list.txt | ./convert_h5file.py --release=0.0.1')
+    os.remove('conversion_list.txt')
     # Find files based on pattern using `find` and pipe into conversion script
     os.system('find -name "data*.h5" | ./convert_h5file.py --release=0.0.1')
 
     res2 = h5w.load('data.h5')
     for key, value in res.items():
         assert(isinstance(res2[key], type(value)))
+
+
+@pytest.fixture()
+def cleanup():
+    yield
+    try:
+        os.remove(fn)
+    except OSError:
+        pass
+
+    try:
+        os.remove(fn2)
+    except OSError:
+        pass
