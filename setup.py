@@ -11,10 +11,10 @@ setup(
     keywords='hdf5 h5py',
     url='https://github.com/INM-6/h5py_wrapper',
     packages=['h5py_wrapper', 'tests'],
-    scripts=['convert_h5file.py'],
+    scripts=['convert_h5file'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
