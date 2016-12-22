@@ -321,6 +321,7 @@ def test_conversion_script():
     os.system('./convert_h5file.py {} {} --release=0.0.1'.format(fn, fn2))
     # Read list of files from file and pipe into conversion script
     os.system('cat conversion_list.txt | ./convert_h5file.py --release=0.0.1')
+    os.remove('conversion_list.txt')
     # Find files based on pattern using `find` and pipe into conversion script
     os.system('find -name "data*.h5" | ./convert_h5file.py --release=0.0.1')
 
