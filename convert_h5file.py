@@ -16,45 +16,12 @@ Options:
 """
 
 import docopt
-import wrapper as h5w
-import requests
-import tarfile
-import numpy as np
 import os
 import importlib
 import sys
 
-
-def _dict_check_for_numpy_types(d):
-    """
-    Convert all numpy datatypes to default datatypes in a dictionary.
-    """
-    for key, value in d.items():
-        if isinstance(value, dict):
-            _dict_check_for_numpy_types(value)
-        elif isinstance(value, (np.int)):
-            d[key] = int(value)
-        elif isinstance(value, (np.float)):
-            d[key] = float(value)
-        elif isinstance(value, (np.bool_)):
-            d[key] = bool(value)
-
-
-def _get_previous_version(version):
-    base_url = "https://github.com/INM-6/h5py_wrapper/archive/v"
-    r = requests.get(''.join((base_url, version, ".tar.gz")))
-    try:
-        r.raise_for_status()
-        fn = ''.join((os.path.join(os.getcwd(), version), '.tar.gz'))
-        with open(fn, 'wb') as f:
-            f.write(r.content)
-        with tarfile.open(fn) as f:
-            f.extract(''.join(('h5py_wrapper-', version, '/wrapper.py')))
-            f.extract(''.join(('h5py_wrapper-', version, '/__init__.py')))
-        os.rename('-'.join(('h5py_wrapper', version)),
-                  '_'.join(('h5py_wrapper', version.replace('.', ''))))
-    except requests.exceptions.HTTPError:
-        raise ImportError("Requested release version does not exist.")
+import h5py_wrapper.wrapper as h5w
+import h5py_wrapper.lib as h5w_lib
 
 if __name__ == '__main__':
     args = docopt.docopt(__doc__)
@@ -64,7 +31,7 @@ if __name__ == '__main__':
     try:
         h5w_old = importlib.import_module('.'.join((release_base_name, 'wrapper')))
     except ImportError:
-        _get_previous_version(args['--release'])
+        h5w_lib.get_previous_version(args['--release'])
         h5w_old = importlib.import_module('.'.join((release_base_name, 'wrapper')))
 
     files = args['<files>'] or sys.stdin.read().splitlines()
@@ -78,7 +45,7 @@ if __name__ == '__main__':
         if args['--verbose']:
             print("Checking for numpy datatypes in scalar values.")
 
-        _dict_check_for_numpy_types(d)
+        h5w_lib.convert_numpy_types_in_dict(d)
 
         if args['--save-backup']:
             if args['--verbose']:

@@ -8,8 +8,9 @@ import os
 import numpy as np
 from numpy.testing import assert_array_equal
 import pytest
-import wrapper as h5w
-from convert_h5file import _get_previous_version
+
+import h5py_wrapper.wrapper as h5w
+import h5py_wrapper.lib as h5w_lib
 
 # check whether quantities is available
 try:
@@ -302,7 +303,7 @@ def test_conversion_script():
     try:
         import h5py_wrapper_001.wrapper as h5w_001
     except ImportError:
-        _get_previous_version('0.0.1')
+        h5w_lib.get_previous_version('0.0.1')
         import h5py_wrapper_001.wrapper as h5w_001
 
     res = {key: value for key, value in zip(simpledata_str, simpledata_val)}
