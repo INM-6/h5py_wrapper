@@ -1,27 +1,6 @@
 # -*- coding: utf-8 -*-
-
 """
-h5py_wrapper.wrapper
-=============
-
-Wrapper to conveniently store arbitrarily nested python dictionaries
-to hdf5 files.
-
-The dictionaries are stored in an hdf5 file by creating groups for
-every level and a dataset for the value in the lowest level.
-
-h5py uses numpy.ndarrays to load datasets since this enables users to
-load only parts of a dataset. this means all lists will be converted
-to arrays when they are loaded from an h5 file. currently there is no
-option to change this behaviour. you need to do this manually after
-loading the file.
-
-Functions
----------
-
-save : store nested dictionary in hdf5 file
-load : load nested dictionary from hdf5 file
-
+Core functionality
 """
 
 import ast
@@ -92,7 +71,7 @@ def save(filename, d, write_mode='a', overwrite_dataset=False,
     >>> d = {}
     >>> d['a'] = {'a1': [1, 2, 3], 'a2': 4., 'a3': {'a31': 'Test'}}
     >>> d['b'] = 'string'
-    >>> import h5py_wrapper.wrapper as h5w
+    >>> import h5py_wrapper as h5w
     >>> h5w.save('example.h5', d)
     """
     try:
@@ -141,7 +120,7 @@ def load(filename, path='', lazy=False):
     >>> d = {}
     >>> d['a'] = {'a1': [1, 2, 3], 'a2': 4., 'a3': {'a31': 'Test'}}
     >>> d['b'] = 'string'
-    >>> import h5py_wrapper.wrapper as h5w
+    >>> import h5py_wrapper as h5w
     >>> h5w.save('example_load.h5', d, overwrite_dataset=True)
     >>> h5w.load('example_load.h5')
     {u'a': {u'a1': array([1, 2, 3]), u'a3': {u'a31': 'Test'}, u'a2': 4.0}, u'b': 'string'}
