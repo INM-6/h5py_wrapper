@@ -17,7 +17,9 @@ Introduction
       
 API reference
 =============
-
+.. toctree::
+   :maxdepth: 2
+	   
    api_reference
 
 Indices and tables
