@@ -33,6 +33,8 @@ import re
 from subprocess import call
 import warnings
 
+from . import lib
+
 # deprecation warnings are printed to sys.stdout
 warnings.simplefilter('default', category=DeprecationWarning)
 
@@ -312,7 +314,7 @@ def _load_custom_shape(f):
     """
     data_reshaped = []
     value = f.value
-    for (j, i), value_type in zip(_accumulate(f.attrs['oldshape']),
+    for (j, i), value_type in zip(lib.accumulate(f.attrs['oldshape']),
                                   f.attrs['custom_value_types']):
         cast_value = _cast_value_type(value[j:j + i],
                                       value_type)
@@ -346,7 +348,7 @@ def _cast_value_type(value, value_type, unit=None):
 
 def _array_to_type(value, value_type):
     """
-    Casts members of arrays to the specified type in an iterative fashion.
+    Casts members of arrays to the specified type recursively.
     """
     if len(value) > 0 and isinstance(value[0], np.ndarray):
         return eval(valuetype_dict[value_type])(_array_to_type(i, value_type) for i in value)
@@ -379,15 +381,3 @@ def load_h5(filename, path='', lazy=False):
                   "will be removed in the next release. Please use load() instead.",
                   DeprecationWarning)
     return load(filename, path=path, lazy=lazy)
-
-
-# Helper function
-def _accumulate(iterator):
-    """
-    Create a generator to iterate over the accumulated
-    values of the given iterator.
-    """
-    total = 0
-    for item in iterator:
-        yield total, item
-        total += item
