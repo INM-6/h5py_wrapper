@@ -25,6 +25,7 @@ fn2 = 'data2.h5'
 i0 = 6
 f0 = 3.14159
 s0 = 'this is a test'
+b0 = True
 
 l0i = [1, 2, 3, 4, 5]
 l0s = ['a', 'b', 'c']
@@ -40,8 +41,8 @@ d0 = {'i': i0, 'f': f0, 's': s0}
 dn0 = {'d1': d0, 'd2': d0}
 
 # define containers
-simpledata_str = ['i', 'f', 's']
-simpledata_val = [i0, f0, s0]
+simpledata_str = ['i', 'f', 's', 'b']
+simpledata_val = [i0, f0, s0, b0]
 
 arraydata_str = ['ai', 'as', 'm']
 arraydata_val = [np.array(l0i), np.array(l0s), np.array(ll0)]
