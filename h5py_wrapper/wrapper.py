@@ -71,7 +71,7 @@ def save(filename, d, write_mode='a', overwrite_dataset=False,
     >>> d = {}
     >>> d['a'] = {'a1': [1, 2, 3], 'a2': 4., 'a3': {'a31': 'Test'}}
     >>> d['b'] = 'string'
-    >>> import h5py_wrapper.wrapper as h5w
+    >>> import h5py_wrapper as h5w
     >>> h5w.save('example.h5', d)
     """
     try:
@@ -120,7 +120,7 @@ def load(filename, path='', lazy=False):
     >>> d = {}
     >>> d['a'] = {'a1': [1, 2, 3], 'a2': 4., 'a3': {'a31': 'Test'}}
     >>> d['b'] = 'string'
-    >>> import h5py_wrapper.wrapper as h5w
+    >>> import h5py_wrapper as h5w
     >>> h5w.save('example_load.h5', d, overwrite_dataset=True)
     >>> h5w.load('example_load.h5')
     {u'a': {u'a1': array([1, 2, 3]), u'a3': {u'a31': 'Test'}, u'a2': 4.0}, u'b': 'string'}
