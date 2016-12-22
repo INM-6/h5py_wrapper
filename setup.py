@@ -12,6 +12,8 @@ setup(
     url='https://github.com/INM-6/h5py_wrapper',
     packages=['h5py_wrapper', 'tests'],
     scripts=['convert_h5file.py'],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     long_description=open('README.md').read(),
     classifiers=[
         'Development Status :: 4 - Beta',
