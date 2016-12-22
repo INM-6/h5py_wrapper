@@ -27,6 +27,7 @@ def get_previous_version(version):
             f.extract(''.join(('h5py_wrapper-', version, '/__init__.py')))
         os.rename('-'.join(('h5py_wrapper', version)),
                   '_'.join(('h5py_wrapper', version.replace('.', ''))))
+        os.remove(fn)
     except requests.exceptions.HTTPError:
         raise ImportError("Requested release version does not exist.")
 
