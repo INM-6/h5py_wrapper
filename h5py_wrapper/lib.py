@@ -3,6 +3,7 @@
 Collection of convenience functions.
 
 """
+
 import numpy as np
 import os
 import requests
@@ -56,3 +57,17 @@ def convert_numpy_types_in_dict(d):
             d[key] = float(value)
         elif isinstance(value, (np.bool_)):
             d[key] = bool(value)
+
+
+def convert_iterable_to_numpy_array(it):
+    """
+    Converts an iterable to a numpy array. If the elements of the
+    iterable are strings, numpy unicode types are avoided by changing
+    dtype to np.string_ to ensure h5py compatibility. See
+    http://docs.h5py.org/en/latest/strings.html#what-about-numpy-s-u-type.
+    """
+    array = np.array(it)
+    if array.dtype.kind == 'U':
+        return array.astype(np.string_)
+    else:
+        return array
