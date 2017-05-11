@@ -4,10 +4,13 @@ h5py_wrapper
 A wrapper to conveniently store nested python dictionaries in hdf5 files. It exposes two basic functions save() and load() to the user.
 
 .. image:: https://img.shields.io/badge/python-2.7-blue.svg
-   :target: www.python.org
+   :target: https://www.python.org/
+   :alt: Python Version
+.. image:: https://img.shields.io/badge/python-3.4-blue.svg
+   :target: https://www.python.org/
    :alt: Python Version
 
-	 
+
 Documentation
 -------------
 http://h5py-wrapper.readthedocs.io/en/latest/

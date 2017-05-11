@@ -5,6 +5,7 @@ Core functionality
 
 import ast
 import collections
+from future.builtins import str
 import h5py
 import numpy as np
 import os
@@ -31,7 +32,7 @@ if int(re.sub('\.', '', h5py.version.version)) < 231:
 
 
 def save(filename, d, write_mode='a', overwrite_dataset=False,
-         resize=False, dict_label='', compression=None):
+         resize=False, path=None, dict_label='', compression=None):
     """
     Save a dictionary to an hdf5 file.
 
@@ -51,10 +52,10 @@ def save(filename, d, write_mode='a', overwrite_dataset=False,
         may reduce file size. Uses h5repack (see
         https://www.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Repack).
         Caution: slows down writing. Defaults to False.
-    dict_label : string, optional
+    path : string, optional
         If not empty, the dictionary is stored under the given path in the hdf5
         file, with levels separated by '/'.
-        For instance, dict_label='test/trial/spiketrains'. Defaults to ''.
+        For instance, path='test/trial/spiketrains'. Defaults to None.
     compression : {'gzip', 'szip','lzf', 0,...,10}, optional
        Compression strategy to reduce file size. An integer >0, <=10 leads to
        usage of gzip,indicating the level of compression. 'gzip' is recommended.
@@ -83,7 +84,16 @@ def save(filename, d, write_mode='a', overwrite_dataset=False,
     else:
         try:
             if dict_label:
-                base = f.require_group(dict_label)
+                warnings.warn("Deprecated argument dict_label provided. "
+                              "dict_label will be removed in the next release. "
+                              "Please use path instead.",
+                              DeprecationWarning)
+                if path is not None:
+                    raise ValueError("dict_label and path must not "
+                                     "be defined simultaneously.")
+                path = dict_label                
+            if path:
+                base = f.require_group(path)
                 _dict_to_h5(f, d, overwrite_dataset, parent_group=base,
                             compression=compression)
             else:
@@ -166,7 +176,7 @@ def _dict_to_h5(f, d, overwrite_dataset, compression=None, parent_group=None):
             # explicitly store type of key
             group.attrs['_key_type'] = type(key).__name__
         else:
-            if str(key) not in parent_group.keys():
+            if str(key) not in parent_group:
                 _create_dataset(parent_group, key, value,
                                 compression=compression)
             else:
@@ -198,7 +208,7 @@ def _create_dataset(parent_group, key, value, compression=None):
                                      parent_group.name, key)))
             else:
                 oldshape = np.array([len(x) for x in value])
-                value_types = [type(x).__name__ for x in value]
+                value_types = lib.convert_iterable_to_numpy_array([type(x).__name__ for x in value])
                 data_reshaped = np.hstack(value)
                 dataset = parent_group.create_dataset(
                     str(key), data=data_reshaped, compression=compression)
@@ -208,21 +218,12 @@ def _create_dataset(parent_group, key, value, compression=None):
         elif quantities_found and isinstance(value, pq.Quantity):
             dataset = parent_group.create_dataset(str(key), data=value)
             dataset.attrs['_unit'] = value.dimensionality.string
-        # To handle unicode strings
-        # Assumes that all entries of value are of the same data type
-        elif len(value) > 0 and isinstance(value[0], unicode):
-            value = [ii.encode('utf-8') for ii in value]
-            dataset = parent_group.create_dataset(
-                str(key), data=value, compression=compression)
         else:
             dataset = parent_group.create_dataset(
-                str(key), data=value, compression=compression)
+                str(key), data=lib.convert_iterable_to_numpy_array(value), compression=compression)
     # ignore compression argument for scalar datasets
     elif not isinstance(value, collections.Iterable):
         dataset = parent_group.create_dataset(str(key), data=value)
-    elif isinstance(value, unicode):
-        dataset = parent_group.create_dataset(
-            str(key), data=value.encode('utf-8'), compression=compression)
     else:
         dataset = parent_group.create_dataset(
             str(key), data=value, compression=compression)
@@ -267,9 +268,9 @@ def _load_dataset(f, lazy=False):
             return None
         else:
             if (len(f.attrs.keys()) > 0 and
-                    'custom_shape' in f.attrs.keys()):
+                    'custom_shape' in f.attrs):
                 return _load_custom_shape(f)
-            elif '_unit' in f.attrs.keys():
+            elif '_unit' in f.attrs:
                 return _cast_value_type(f.value, value_type,
                                         unit=f.attrs['_unit'])
             else:
@@ -281,7 +282,7 @@ def _evaluate_key(f):
     Evaluate the key of f and handle non-string data types.
     """
     name = os.path.basename(f.name)  # to return only name of this level
-    if ('_key_type' in f.attrs.keys() and
+    if ('_key_type' in f.attrs and
             f.attrs['_key_type'] not in ['str', 'unicode', 'string_']):
         name = ast.literal_eval(name)
     return name
@@ -293,8 +294,9 @@ def _load_custom_shape(f):
     """
     data_reshaped = []
     value = f.value
+    custom_value_types = f.attrs['custom_value_types'].astype(np.unicode_)
     for (j, i), value_type in zip(lib.accumulate(f.attrs['oldshape']),
-                                  f.attrs['custom_value_types']):
+                                  custom_value_types):
         cast_value = _cast_value_type(value[j:j + i],
                                       value_type)
         data_reshaped.append(cast_value)
@@ -315,10 +317,14 @@ def _cast_value_type(value, value_type, unit=None):
                                   "reload the wrapper.")
         else:
             if value_type in ['list', 'tuple']:
+                if isinstance(value, np.ndarray) and value.dtype.kind == 'S':
+                    value = value.astype(np.unicode_)
                 # ensures that all dimensions of the array are converted to the correct value type
                 value = _array_to_type(value, value_type)
             else:
                 value = eval(valuetype_dict[value_type])(value)
+                if isinstance(value, np.ndarray) and value.dtype.kind == 'S':
+                    value = value.astype(np.unicode_)
         return value
     else:
         raise NotImplementedError("Unsupported data type: "

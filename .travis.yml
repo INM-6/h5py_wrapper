@@ -2,6 +2,7 @@ sudo: false
 language: python
 python:
   - "2.7"
+  - "3.4"
 branches:
   only:
     - master
@@ -10,12 +11,14 @@ before_install:
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
   - export PATH=$HOME/miniconda2/bin:$PATH
-  - conda update --yes conda
+  - conda create --yes -n myenv python=$TRAVIS_PYTHON_VERSION
+  - source activate myenv
   - pip install --upgrade pip
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy h5py==2.3.1
-  - pip install --upgrade quantities pytest pytest-cov coveralls
-  - pip install docopt
+  - conda install --yes numpy h5py==2.3.1
+  - pip install --upgrade quantities future requests
+  - pip install pytest pytest-cov coveralls
+  - pip install --upgrade docopt
 script:
   - pytest
 after_success:

@@ -4,10 +4,12 @@ Unit and integration tests for the h5py_wrapper module
 
 """
 
+from future.builtins import str, range
 import os
 import numpy as np
 from numpy.testing import assert_array_equal
 import pytest
+import sys
 
 import h5py_wrapper.wrapper as h5w
 import h5py_wrapper.lib as h5w_lib
@@ -70,7 +72,7 @@ def _construct_simpledata():
 
 def test_write_and_load_with_label():
     res = _construct_simpledata()
-    h5w.save(fn, res, write_mode='w', dict_label='test_label')
+    h5w.save(fn, res, write_mode='w', path='test_label')
     for key, val in zip(simpledata_str, simpledata_val):
         assert(h5w.load(fn, 'test_label/' + key) == val)
 
@@ -120,7 +122,7 @@ def test_store_and_load_listdata():
     res = h5w.load(fn)
     for key, val in zip(listdata_str, listdata_val):
         if isinstance(val[0], list):
-            for ii in xrange(len(val)):
+            for ii in range(len(val)):
                 assert(isinstance(res[key][ii], list))
                 assert_array_equal(res[key][ii], val[ii])
         else:
@@ -236,11 +238,11 @@ def test_store_and_load_custom_array():
     h5w.save(fn, {'a': a}, overwrite_dataset=True)
     # loading the whole data
     res = h5w.load(fn)
-    for i in xrange(len(a)):
+    for i in range(len(a)):
         assert_array_equal(a[i], res['a'][i])
     # loading path directly
     res = h5w.load(fn, path='a/')
-    for i in xrange(len(a)):
+    for i in range(len(a)):
         assert_array_equal(a[i], res[i])
 
 
@@ -268,8 +270,8 @@ def test_store_and_test_key_types():
 
     keys = ['a', (1, 2), 4.]
     for k in keys:
-        assert(k in res.keys())
-    assert(4 in res[(1, 2)].keys())
+        assert(k in res)
+    assert(4 in res[(1, 2)])
 
 
 def test_load_lazy_simple():
@@ -302,6 +304,8 @@ def test_file_close_on_exception():
     h5w.save(fn, res, write_mode='w')
 
 
+@pytest.mark.skipif(sys.version_info >= (3, 0, 0),
+                    reason='Previous release requires Python2')
 def test_conversion_script():
     try:
         import h5py_wrapper_001.wrapper as h5w_001
@@ -325,9 +329,22 @@ def test_conversion_script():
     # Find files based on pattern using `find` and pipe into conversion script
     os.system('find -name "data*.h5" | ./convert_h5file --release=0.0.1')
 
-    res2 = h5w.load('data.h5')
+    res2 = h5w.load(fn)
     for key, value in res.items():
-        assert(isinstance(res2[key], type(value)))
+        if isinstance(res2[key], np.ndarray):
+            assert_array_equal(res2[key], value)
+        else:
+            assert(res2[key] == value)
+        if isinstance(res2[key], str):
+            assert(isinstance(res2[key], type(str(value))))
+        else:
+            assert(isinstance(res2[key], type(value)))
+
+
+def test_raises_error_for_dictlabel_and_path():
+    res = {}
+    with pytest.raises(ValueError):
+        h5w.save(fn, res, dict_label='test', path='test')
 
 
 @pytest.fixture()
