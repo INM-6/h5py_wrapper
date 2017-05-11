@@ -31,7 +31,7 @@ if int(re.sub('\.', '', h5py.version.version)) < 231:
 
 
 def save(filename, d, write_mode='a', overwrite_dataset=False,
-         resize=False, dict_label='', compression=None):
+         resize=False, path=None, dict_label='', compression=None):
     """
     Save a dictionary to an hdf5 file.
 
@@ -51,10 +51,10 @@ def save(filename, d, write_mode='a', overwrite_dataset=False,
         may reduce file size. Uses h5repack (see
         https://www.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Repack).
         Caution: slows down writing. Defaults to False.
-    dict_label : string, optional
+    path : string, optional
         If not empty, the dictionary is stored under the given path in the hdf5
         file, with levels separated by '/'.
-        For instance, dict_label='test/trial/spiketrains'. Defaults to ''.
+        For instance, path='test/trial/spiketrains'. Defaults to None.
     compression : {'gzip', 'szip','lzf', 0,...,10}, optional
        Compression strategy to reduce file size. An integer >0, <=10 leads to
        usage of gzip,indicating the level of compression. 'gzip' is recommended.
@@ -83,7 +83,16 @@ def save(filename, d, write_mode='a', overwrite_dataset=False,
     else:
         try:
             if dict_label:
-                base = f.require_group(dict_label)
+                warnings.warn("Deprecated argument dict_label provided. "
+                              "dict_label will be removed in the next release. "
+                              "Please use path instead.",
+                              DeprecationWarning)
+                if path is not None:
+                    raise ValueError("dict_label and path must not "
+                                     "be defined simultaneously.")
+                path = dict_label                
+            if path:
+                base = f.require_group(path)
                 _dict_to_h5(f, d, overwrite_dataset, parent_group=base,
                             compression=compression)
             else:

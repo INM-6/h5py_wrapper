@@ -70,7 +70,7 @@ def _construct_simpledata():
 
 def test_write_and_load_with_label():
     res = _construct_simpledata()
-    h5w.save(fn, res, write_mode='w', dict_label='test_label')
+    h5w.save(fn, res, write_mode='w', path='test_label')
     for key, val in zip(simpledata_str, simpledata_val):
         assert(h5w.load(fn, 'test_label/' + key) == val)
 
@@ -329,6 +329,11 @@ def test_conversion_script():
     for key, value in res.items():
         assert(isinstance(res2[key], type(value)))
 
+def test_raises_error_for_dictlabel_and_path():
+    res = {}
+    with pytest.raises(ValueError):
+        h5w.save(fn, res, dict_label='test', path='test')
+    
 
 @pytest.fixture()
 def cleanup():
