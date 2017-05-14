@@ -16,7 +16,11 @@ before_install:
   - pip install --upgrade pip
 install:
   - conda install --yes numpy h5py==2.3.1
-  - pip install --upgrade quantities pytest future requests
+  - pip install --upgrade quantities future requests
+  - pip install pytest pytest-cov coveralls
   - pip install --upgrade docopt
 script:
-  - pytest
+  - pytest --cov=h5py_wrapper
+after_success:
+  - coveralls
+

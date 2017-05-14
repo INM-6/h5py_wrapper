@@ -22,3 +22,7 @@ Code status
 .. image:: https://travis-ci.org/INM-6/h5py_wrapper.svg?branch=master
    :target: https://travis-ci.org/INM-6/h5py_wrapper
    :alt: Build Status
+
+.. image:: https://coveralls.io/repos/github/INM-6/h5py_wrapper/badge.svg?branch=master
+   :target: https://coveralls.io/github/INM-6/h5py_wrapper?branch=master
+   :alt: Test Coverage
