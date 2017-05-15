@@ -18,6 +18,8 @@ The following data types are supported:
 * tuple
 
 * numpy.array
+
+* numpy.int64 and numpy.float64
     
 * list
     
