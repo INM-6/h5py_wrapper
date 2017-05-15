@@ -153,7 +153,16 @@ def test_store_and_load_dictdata():
         for key, val in dval.items():
             assert(res[dkey][key] == val)
 
-
+def test_store_and_load_numpy_datatypes():
+    res = {}
+    res['float64'] = np.float64(f0)
+    res['int64'] = np.int64(i0)
+    h5w.save(fn, res, write_mode='w')
+    res.clear()
+    res = h5w.load(fn)
+    assert(isinstance(res['float64'], np.float64))
+    assert(isinstance(res['int64'], np.int64))
+    
 def test_overwrite_dataset():
     res = {'a': 5}
     h5w.save(fn, res, write_mode='w')
