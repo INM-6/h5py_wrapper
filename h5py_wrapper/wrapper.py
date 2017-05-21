@@ -348,7 +348,9 @@ valuetype_dict = {'tuple': 'tuple',
                   'int': 'int',
                   'str': 'str',
                   'bool': 'bool',
-                  'Quantity': 'pq.Quantity'}
+                  'Quantity': 'pq.Quantity',
+                  'int64': 'np.int64',
+                  'float64': 'np.float64'}
 
 
 # Deprecated names for load and save routine
