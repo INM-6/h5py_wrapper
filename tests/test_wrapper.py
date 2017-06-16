@@ -34,6 +34,7 @@ l0i = [1, 2, 3, 4, 5]
 l0s = ['a', 'b', 'c']
 ll0 = [[6, 7, 8], [9, 10, 11]]
 ln0 = [[12, 13], [14, 15, 16]]
+lc0 = [1+1.j, 2+2.j, 3+3.j]
 
 t0i = (1, 2, 3, 4, 5)
 t0s = ('a', 'b', 'c')
@@ -44,11 +45,14 @@ d0 = {'i': i0, 'f': f0, 's': s0}
 dn0 = {'d1': d0, 'd2': d0}
 
 # define containers
-simpledata_str = ['i', 'f', 's', 'b']
+simpledata_str = ['i', 'f', 's', 'b', 'c']
 simpledata_val = [i0, f0, s0, b0]
 
-arraydata_str = ['ai', 'as', 'm']
-arraydata_val = [np.array(l0i), np.array(l0s), np.array(ll0)]
+arraydata_str = ['ai', 'as', 'm', 'c']
+arraydata_val = [np.array(l0i),
+                 np.array(l0s),
+                 np.array(ll0),
+                 np.array(lc0)]
 
 listdata_str = ['li', 'ls', 'm', 'ln']
 listdata_val = [l0i, l0s, ll0, ln0]
