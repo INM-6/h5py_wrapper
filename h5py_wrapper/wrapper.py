@@ -259,13 +259,13 @@ def _load_dataset(f, lazy=False):
     else:
         try:
             value_type = f.attrs['_value_type']
-            if isinstance(value_type, bytes):
-                value_type = str(value_type, 'utf-8')
         except KeyError:
             raise KeyError("No value type stored. This file has "
                            "probably been created with a previous release version. "
                            "Please use the conversion script to convert your "
                            "file.")
+        if isinstance(value_type, bytes):
+            value_type = str(value_type, 'utf-8')
         if value_type == 'NoneType':
             return None
         else:
