@@ -259,6 +259,8 @@ def _load_dataset(f, lazy=False):
     else:
         try:
             value_type = f.attrs['_value_type']
+            if isinstance(value_type, bytes):
+                value_type = str(value_type, 'utf-8')
         except KeyError:
             raise KeyError("No value type stored. This file has "
                            "probably been created with a previous release version. "
@@ -282,9 +284,12 @@ def _evaluate_key(f):
     Evaluate the key of f and handle non-string data types.
     """
     name = os.path.basename(f.name)  # to return only name of this level
-    if ('_key_type' in f.attrs and
-            f.attrs['_key_type'] not in ['str', 'unicode', 'string_']):
-        name = ast.literal_eval(name)
+    if '_key_type' in f.attrs:
+        key_type = f.attrs['_key_type']
+        if isinstance(key_type, bytes):
+            key_type = str(key_type, 'utf-8')
+            if key_type not in ['str', 'unicode', 'string_']:
+                name = ast.literal_eval(name)
     return name
 
 
