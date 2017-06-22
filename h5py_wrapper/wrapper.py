@@ -288,8 +288,8 @@ def _evaluate_key(f):
         key_type = f.attrs['_key_type']
         if isinstance(key_type, bytes):
             key_type = str(key_type, 'utf-8')
-            if key_type not in ['str', 'unicode', 'string_']:
-                name = ast.literal_eval(name)
+        if key_type not in ['str', 'unicode', 'string_']:
+            name = ast.literal_eval(name)
     return name
 
 
