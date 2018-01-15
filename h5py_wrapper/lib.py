@@ -10,7 +10,7 @@ import requests
 import tarfile
 
 
-def get_previous_version(version):
+def get_previous_version(version, path):
     """
     Retrieves the given version of the wrapper from github as a tar
     archive and extracts its contents to the current directory.
@@ -18,17 +18,18 @@ def get_previous_version(version):
     """
     base_url = "https://github.com/INM-6/h5py_wrapper/archive/v"
     r = requests.get(''.join((base_url, version, ".tar.gz")))
+    # Convert path to str
+    path = str(path)
     try:
         r.raise_for_status()
-        fn = ''.join((os.path.join(os.getcwd(), version), '.tar.gz'))
+        fn = ''.join((os.path.join(path, version), '.tar.gz'))
         with open(fn, 'wb') as f:
             f.write(r.content)
         with tarfile.open(fn) as f:
-            f.extract(''.join(('h5py_wrapper-', version, '/wrapper.py')))
-            f.extract(''.join(('h5py_wrapper-', version, '/__init__.py')))
-        os.rename('-'.join(('h5py_wrapper', version)),
-                  '_'.join(('h5py_wrapper', version.replace('.', ''))))
-        os.remove(fn)
+            f.extractall(path=path)
+        os.rename(os.path.join(path, '-'.join(('h5py_wrapper', version))),
+                  os.path.join(path, '_'.join(('h5py_wrapper', version.replace('.', '')))))
+        # os.remove(fn)
     except requests.exceptions.HTTPError:
         raise ImportError("Requested release version does not exist.")
 

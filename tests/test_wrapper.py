@@ -319,12 +319,13 @@ def test_file_close_on_exception():
 
 @pytest.mark.skipif(sys.version_info >= (3, 0, 0),
                     reason='Previous release requires Python2')
-def test_conversion_script():
+def test_conversion_script(tmpdir):
     try:
         import h5py_wrapper_001.wrapper as h5w_001
     except ImportError:
-        h5w_lib.get_previous_version('0.0.1')
-        import h5py_wrapper_001.wrapper as h5w_001
+        h5w_lib.get_previous_version('0.0.1', tmpdir)
+        sys.path.append(os.path.join(str(tmpdir), 'h5py_wrapper_001'))
+        import h5py_wrapper.wrapper as h5w_001
 
     res = {key: value for key, value in zip(simpledata_str, simpledata_val)}
     res.update({key: value for key, value in zip(arraydata_str, arraydata_val)})
