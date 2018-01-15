@@ -15,7 +15,7 @@ before_install:
   - source activate myenv
   - pip install --upgrade pip
 install:
-  - conda install --yes numpy h5py==2.3.1
+  - conda install --yes numpy h5py==2.7.0
   - pip install --upgrade quantities future requests
   - pip install pytest pytest-cov coveralls
   - pip install --upgrade docopt
