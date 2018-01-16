@@ -15,6 +15,14 @@ def get_previous_version(version, path):
     Retrieves the given version of the wrapper from github as a tar
     archive and extracts its contents to the current directory.
 
+    Parameters
+    ----------
+    version : str
+        Version number in format 'X.X.X'
+        Note that for version 0.0.1, the it has
+        to be specified as 'v0.0.1'.
+    path : str
+        Path to store the files.
     """
     base_url = "https://github.com/INM-6/h5py_wrapper/archive/"
     r = requests.get(''.join((base_url, version, ".tar.gz")))
@@ -29,7 +37,6 @@ def get_previous_version(version, path):
             f.extractall(path=path)
         os.rename(os.path.join(path, '-'.join(('h5py_wrapper', version))),
                   os.path.join(path, '_'.join(('h5py_wrapper', version.replace('.', '')))))
-        # os.remove(fn)
     except requests.exceptions.HTTPError:
         raise ImportError("Requested release version does not exist.")
 
