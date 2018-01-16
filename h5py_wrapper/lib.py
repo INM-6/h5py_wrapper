@@ -16,7 +16,7 @@ def get_previous_version(version, path):
     archive and extracts its contents to the current directory.
 
     """
-    base_url = "https://github.com/INM-6/h5py_wrapper/archive/v"
+    base_url = "https://github.com/INM-6/h5py_wrapper/archive/"
     r = requests.get(''.join((base_url, version, ".tar.gz")))
     # Convert path to str
     path = str(path)

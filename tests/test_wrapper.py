@@ -321,27 +321,27 @@ def test_file_close_on_exception():
                     reason='Previous release requires Python2')
 def test_conversion_script(tmpdir):
     try:
-        import h5py_wrapper_001.wrapper as h5w_001
+        import h5py_wrapper_101.wrapper as h5w_101
     except ImportError:
-        h5w_lib.get_previous_version('0.0.1', tmpdir)
-        sys.path.append(os.path.join(str(tmpdir), 'h5py_wrapper_001'))
-        import h5py_wrapper.wrapper as h5w_001
+        h5w_lib.get_previous_version('1.0.1', tmpdir)
+        sys.path.append(os.path.join(str(tmpdir), 'h5py_wrapper_101'))
+        import h5py_wrapper.wrapper as h5w_101
 
     res = {key: value for key, value in zip(simpledata_str, simpledata_val)}
     res.update({key: value for key, value in zip(arraydata_str, arraydata_val)})
-    h5w_001.add_to_h5(fn, res)
-    h5w_001.add_to_h5(fn2, res)
+    h5w_101.add_to_h5(fn, res)
+    h5w_101.add_to_h5(fn2, res)
     with open('conversion_list.txt', 'w') as f:
         f.write(fn)
         f.write('\n')
         f.write(fn2)
     # Specify list on command line
-    os.system('./convert_h5file {} {} --release=0.0.1'.format(fn, fn2))
+    os.system('./convert_h5file {} {} --release=1.0.1'.format(fn, fn2))
     # Read list of files from file and pipe into conversion script
-    os.system('cat conversion_list.txt | ./convert_h5file --release=0.0.1')
+    os.system('cat conversion_list.txt | ./convert_h5file --release=1.0.1')
     os.remove('conversion_list.txt')
     # Find files based on pattern using `find` and pipe into conversion script
-    os.system('find -name "data*.h5" | ./convert_h5file --release=0.0.1')
+    os.system('find -name "data*.h5" | ./convert_h5file --release=1.0.1')
 
     res2 = h5w.load(fn)
     for key, value in res.items():
