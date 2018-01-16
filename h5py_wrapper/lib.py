@@ -35,6 +35,10 @@ def get_previous_version(version, path):
             f.write(r.content)
         with tarfile.open(fn) as f:
             f.extractall(path=path)
+        # This is necessary to account for the fact that version 0.0.1 was called v0.0.1
+        # but all subsequent version are called X.X.X without the leading v.
+        if version[0] == 'v':
+            version = version[1:]
         os.rename(os.path.join(path, '-'.join(('h5py_wrapper', version))),
                   os.path.join(path, '_'.join(('h5py_wrapper', version.replace('.', '')))))
     except requests.exceptions.HTTPError:
