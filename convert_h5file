@@ -19,6 +19,7 @@ import docopt
 import os
 import importlib
 import sys
+import tempfile
 
 import h5py_wrapper.wrapper as h5w
 import h5py_wrapper.lib as h5w_lib
@@ -28,11 +29,16 @@ if __name__ == '__main__':
     # First get release version used to create the file to be converted
     version_stripped = args['--release'].replace('.', '')
     release_base_name = '_'.join(('h5py_wrapper', version_stripped))
+    # This case distinction is necessary because the directory structure
+    # changes between versions
+    module = '.'.join((release_base_name, 'wrapper'))
     try:
-        h5w_old = importlib.import_module('.'.join((release_base_name, 'wrapper')))
+        h5w_old = importlib.import_module(module)
     except ImportError:
-        h5w_lib.get_previous_version(args['--release'])
-        h5w_old = importlib.import_module('.'.join((release_base_name, 'wrapper')))
+        tmpdir = tempfile.mkdtemp()
+        h5w_lib.get_previous_version(args['--release'], tmpdir)
+        sys.path.append(tmpdir)
+        h5w_old = importlib.import_module(module)
 
     files = args['<files>'] or sys.stdin.read().splitlines()
     for fn in files:
