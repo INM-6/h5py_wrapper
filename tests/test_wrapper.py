@@ -5,6 +5,7 @@ Unit and integration tests for the h5py_wrapper module
 """
 
 from future.builtins import str, range
+import importlib
 import os
 import numpy as np
 from numpy.testing import assert_array_equal
@@ -157,6 +158,7 @@ def test_store_and_load_dictdata():
         for key, val in dval.items():
             assert(res[dkey][key] == val)
 
+
 def test_store_and_load_numpy_datatypes():
     res = {}
     res['float64'] = np.float64(f0)
@@ -166,7 +168,8 @@ def test_store_and_load_numpy_datatypes():
     res = h5w.load(fn)
     assert(isinstance(res['float64'], np.float64))
     assert(isinstance(res['int64'], np.int64))
-    
+
+
 def test_overwrite_dataset():
     res = {'a': 5}
     h5w.save(fn, res, write_mode='w')
@@ -317,42 +320,63 @@ def test_file_close_on_exception():
     h5w.save(fn, res, write_mode='w')
 
 
+# This test is only run for Python 2 because version v0.0.1
+# and 1.0.1 are not compatible with Python 3.
+# Once there are releases compatible with Python 3, we have to
+# change this.
 @pytest.mark.skipif(sys.version_info >= (3, 0, 0),
                     reason='Previous release requires Python2')
 def test_conversion_script(tmpdir):
-    try:
-        import h5py_wrapper_101.wrapper as h5w_101
-    except ImportError:
-        h5w_lib.get_previous_version('1.0.1', tmpdir)
-        sys.path.append(os.path.join(str(tmpdir), 'h5py_wrapper_101'))
-        import h5py_wrapper.wrapper as h5w_101
+    # convert LocalPath object to str to ensure that path can be
+    # handled by os.path.join()
+    path = str(tmpdir)
 
-    res = {key: value for key, value in zip(simpledata_str, simpledata_val)}
-    res.update({key: value for key, value in zip(arraydata_str, arraydata_val)})
-    h5w_101.add_to_h5(fn, res)
-    h5w_101.add_to_h5(fn2, res)
-    with open('conversion_list.txt', 'w') as f:
-        f.write(fn)
-        f.write('\n')
-        f.write(fn2)
-    # Specify list on command line
-    os.system('./convert_h5file {} {} --release=1.0.1'.format(fn, fn2))
-    # Read list of files from file and pipe into conversion script
-    os.system('cat conversion_list.txt | ./convert_h5file --release=1.0.1')
-    os.remove('conversion_list.txt')
-    # Find files based on pattern using `find` and pipe into conversion script
-    os.system('find -name "data*.h5" | ./convert_h5file --release=1.0.1')
+    previous_versions = ['0.0.1', '1.0.1']
+    for version in previous_versions:
+        print(version)
+        version_stripped = version.replace('.', '')
+        release_base_name = '_'.join(('h5py_wrapper', version_stripped))
+        module = '.'.join((release_base_name, 'wrapper'))
+        try:
+            h5w_prev = importlib.import_module(module)
+        except ImportError:
+            h5w_lib.get_previous_version(version, tmpdir)
+            sys.path.append(path)
+            print(sys.path[-1])
+            print(module)
+            h5w_prev = importlib.import_module(module)
 
-    res2 = h5w.load(fn)
-    for key, value in res.items():
-        if isinstance(res2[key], np.ndarray):
-            assert_array_equal(res2[key], value)
-        else:
-            assert(res2[key] == value)
-        if isinstance(res2[key], str):
-            assert(isinstance(res2[key], type(str(value))))
-        else:
-            assert(isinstance(res2[key], type(value)))
+        tmp_fn = os.path.join(path, fn)
+        tmp_fn2 = os.path.join(path, fn2)
+        res = {key: value for key, value in zip(simpledata_str, simpledata_val)}
+        res.update({key: value for key, value in zip(arraydata_str, arraydata_val)})
+        h5w_prev.add_to_h5(tmp_fn, res)
+        h5w_prev.add_to_h5(tmp_fn2, res)
+        with open('conversion_list.txt', 'w') as f:
+            f.write(tmp_fn)
+            f.write('\n')
+            f.write(tmp_fn2)
+
+        # Specify list on command line
+        os.system('./../convert_h5file {} {} --release={}'.format(tmp_fn, tmp_fn2, version))
+        # Read list of files from file and pipe into conversion script
+        os.system('cat conversion_list.txt | ./../convert_h5file --release={}'.format(version))
+        os.remove('conversion_list.txt')
+        # Find files based on pattern using `find` and pipe into conversion script
+        os.system('find -name "data*.h5" | ./../convert_h5file --release={}'.format(version))
+
+        res2 = h5w.load(tmp_fn)
+        for key, value in res.items():
+            if isinstance(res2[key], np.ndarray):
+                assert_array_equal(res2[key], value)
+            else:
+                assert(res2[key] == value)
+            if isinstance(res2[key], str):
+                assert(isinstance(res2[key], type(str(value))))
+            else:
+                assert(isinstance(res2[key], type(value)))
+        os.remove(tmp_fn)
+        os.remove(tmp_fn2)
 
 
 def test_raises_error_for_dictlabel_and_path():

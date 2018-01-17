@@ -19,13 +19,20 @@ def get_previous_version(version, path):
     ----------
     version : str
         Version number in format 'X.X.X'
-        Note that for version 0.0.1, the it has
-        to be specified as 'v0.0.1'.
     path : str
         Path to store the files.
+
+    Returns
+    -------
+    package_dir : str
+        Path to package.
     """
     base_url = "https://github.com/INM-6/h5py_wrapper/archive/"
-    r = requests.get(''.join((base_url, version, ".tar.gz")))
+    if version == '0.0.1':
+        ver = 'v0.0.1'
+    else:
+        ver = version
+    r = requests.get(''.join((base_url, ver, ".tar.gz")))
     # convert LocalPath object to str (if path to tmp dir is passed by py.test)
     # to ensure that path can be handled by os.path.join()
     path = str(path)
@@ -36,12 +43,16 @@ def get_previous_version(version, path):
             f.write(r.content)
         with tarfile.open(fn) as f:
             f.extractall(path=path)
-        # This is necessary to account for the fact that version 0.0.1 was called v0.0.1
-        # but all subsequent version are called X.X.X without the leading v.
-        if version[0] == 'v':
-            version = version[1:]
-        os.rename(os.path.join(path, '-'.join(('h5py_wrapper', version))),
-                  os.path.join(path, '_'.join(('h5py_wrapper', version.replace('.', '')))))
+
+        # This case distinction is necessary because the directory structure
+        # changes between versions
+        if version == '0.0.1':
+            pkg_wrp_dir = os.path.join(path, '-'.join(('h5py_wrapper', version)))
+        elif version == '1.0.1':
+            pkg_wrp_dir = os.path.join(path, '-'.join(('h5py_wrapper', version)), 'h5py_wrapper')
+        package_dir = os.path.join(path, '_'.join(('h5py_wrapper', version.replace('.', ''))))
+        os.rename(pkg_wrp_dir, package_dir)
+        return package_dir
     except requests.exceptions.HTTPError:
         raise ImportError("Requested release version does not exist.")
 
