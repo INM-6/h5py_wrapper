@@ -26,7 +26,8 @@ def get_previous_version(version, path):
     """
     base_url = "https://github.com/INM-6/h5py_wrapper/archive/"
     r = requests.get(''.join((base_url, version, ".tar.gz")))
-    # Convert path to str
+    # convert LocalPath object to str (if path to tmp dir is passed by py.test)
+    # to ensure that path can be handled by os.path.join()
     path = str(path)
     try:
         r.raise_for_status()
