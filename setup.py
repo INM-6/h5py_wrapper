@@ -11,6 +11,7 @@ setup(
     keywords='hdf5 h5py',
     url='https://github.com/INM-6/h5py_wrapper',
     packages=['h5py_wrapper', 'tests'],
+    python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     scripts=['convert_h5file'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
@@ -21,7 +22,10 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Utilities',
     ],
 )
