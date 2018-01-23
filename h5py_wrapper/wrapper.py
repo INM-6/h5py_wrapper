@@ -327,6 +327,8 @@ def _cast_value_type(value, value_type, unit=None):
                 # ensures that all dimensions of the array are converted to the correct value type
                 value = _array_to_type(value, value_type)
             else:
+                if hasattr(value, 'decode'):
+                    value = value.decode()
                 value = eval(valuetype_dict[value_type])(value)
                 if isinstance(value, np.ndarray) and value.dtype.kind == 'S':
                     value = value.astype(np.unicode_)
