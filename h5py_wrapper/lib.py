@@ -75,12 +75,12 @@ def convert_numpy_types_in_dict(d):
     for key, value in d.items():
         if isinstance(value, dict):
             convert_numpy_types_in_dict(value)
-        elif isinstance(value, (np.int)):
-            d[key] = int(value)
         elif isinstance(value, (np.float)):
             d[key] = float(value)
-        elif isinstance(value, (np.bool_)):
+        elif isinstance(value, (np.bool, np.bool_)):
             d[key] = bool(value)
+        elif isinstance(value, (np.int)):
+            d[key] = int(value)
 
 
 def convert_iterable_to_numpy_array(it):
