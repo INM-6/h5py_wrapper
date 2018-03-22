@@ -264,6 +264,8 @@ def _load_dataset(f, lazy=False):
                            "probably been created with a previous release version. "
                            "Please use the conversion script to convert your "
                            "file.")
+        if isinstance(value_type, bytes):
+            value_type = str(value_type, 'utf-8')
         if value_type == 'NoneType':
             return None
         else:
@@ -282,9 +284,12 @@ def _evaluate_key(f):
     Evaluate the key of f and handle non-string data types.
     """
     name = os.path.basename(f.name)  # to return only name of this level
-    if ('_key_type' in f.attrs and
-            f.attrs['_key_type'] not in ['str', 'unicode', 'string_']):
-        name = ast.literal_eval(name)
+    if '_key_type' in f.attrs:
+        key_type = f.attrs['_key_type']
+        if isinstance(key_type, bytes):
+            key_type = str(key_type, 'utf-8')
+        if key_type not in ['str', 'unicode', 'string_']:
+            name = ast.literal_eval(name)
     return name
 
 
@@ -322,6 +327,8 @@ def _cast_value_type(value, value_type, unit=None):
                 # ensures that all dimensions of the array are converted to the correct value type
                 value = _array_to_type(value, value_type)
             else:
+                if hasattr(value, 'decode'):
+                    value = value.decode()
                 value = eval(valuetype_dict[value_type])(value)
                 if isinstance(value, np.ndarray) and value.dtype.kind == 'S':
                     value = value.astype(np.unicode_)
