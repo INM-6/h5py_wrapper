@@ -144,14 +144,15 @@ def load(filename, path='', lazy=False):
     else:
         try:
             if not path:
-                _, d = _dict_from_h5(f, lazy=lazy)
+                obj = f
             else:
                 try:
-                    _, d = _dict_from_h5(f[path], lazy=lazy)
+                    obj = f[path]
                 except KeyError:
                     raise KeyError("unable to open {filename}/{path} "
                                    "(Key accessability: Unable to access "
                                    "key)".format(filename=filename, path=path))
+            _, d = _dict_from_h5(obj, lazy=lazy)
         finally:
             f.close()
     return d
