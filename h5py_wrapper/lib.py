@@ -10,25 +10,49 @@ import requests
 import tarfile
 
 
-def get_previous_version(version):
+def get_previous_version(version, path):
     """
     Retrieves the given version of the wrapper from github as a tar
     archive and extracts its contents to the current directory.
 
+    Parameters
+    ----------
+    version : str
+        Version number in format 'X.X.X'
+    path : str
+        Path to store the files.
+
+    Returns
+    -------
+    package_dir : str
+        Path to package.
     """
-    base_url = "https://github.com/INM-6/h5py_wrapper/archive/v"
-    r = requests.get(''.join((base_url, version, ".tar.gz")))
+    base_url = "https://github.com/INM-6/h5py_wrapper/archive/"
+    if version == '0.0.1':
+        ver = 'v0.0.1'
+    else:
+        ver = version
+    r = requests.get(''.join((base_url, ver, ".tar.gz")))
+    # convert LocalPath object to str (if path to tmp dir is passed by py.test)
+    # to ensure that path can be handled by os.path.join()
+    path = str(path)
     try:
         r.raise_for_status()
-        fn = ''.join((os.path.join(os.getcwd(), version), '.tar.gz'))
+        fn = ''.join((os.path.join(path, version), '.tar.gz'))
         with open(fn, 'wb') as f:
             f.write(r.content)
         with tarfile.open(fn) as f:
-            f.extract(''.join(('h5py_wrapper-', version, '/wrapper.py')))
-            f.extract(''.join(('h5py_wrapper-', version, '/__init__.py')))
-        os.rename('-'.join(('h5py_wrapper', version)),
-                  '_'.join(('h5py_wrapper', version.replace('.', ''))))
-        os.remove(fn)
+            f.extractall(path=path)
+
+        # This case distinction is necessary because the directory structure
+        # changes between versions
+        if version == '0.0.1':
+            pkg_wrp_dir = os.path.join(path, '-'.join(('h5py_wrapper', version)))
+        elif version == '1.0.1':
+            pkg_wrp_dir = os.path.join(path, '-'.join(('h5py_wrapper', version)), 'h5py_wrapper')
+        package_dir = os.path.join(path, '_'.join(('h5py_wrapper', version.replace('.', ''))))
+        os.rename(pkg_wrp_dir, package_dir)
+        return package_dir
     except requests.exceptions.HTTPError:
         raise ImportError("Requested release version does not exist.")
 
