@@ -360,20 +360,3 @@ valuetype_dict = {'tuple': 'tuple',
                   'int64': 'np.int64',
                   'float64': 'np.float64',
                   'complex128': 'np.complex128'}
-
-
-# Deprecated names for load and save routine
-def add_to_h5(filename, d, write_mode='a', overwrite_dataset=False,
-              resize=False, dict_label='', compression=None):
-    warnings.warn("Deprecated function name. This function "
-                  "will be removed in the next release. Please use save() instead.",
-                  DeprecationWarning)
-    save(filename, d, write_mode=write_mode, overwrite_dataset=overwrite_dataset,
-         resize=resize, dict_label=dict_label, compression=compression)
-
-
-def load_h5(filename, path='', lazy=False):
-    warnings.warn("Deprecated function name. This function "
-                  "will be removed in the next release. Please use load() instead.",
-                  DeprecationWarning)
-    return load(filename, path=path, lazy=lazy)
