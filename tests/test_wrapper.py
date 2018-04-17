@@ -358,12 +358,25 @@ def test_conversion_script(tmpdir):
             f.write(tmp_fn2)
 
         # Specify list on command line
-        os.system('./../convert_h5file {} {} --release={}'.format(tmp_fn, tmp_fn2, version))
+        conversion_file_cmd = 'convert_h5file'
+        cmd = 'python {}/../{} {} {} --release={}'.format(os.path.dirname(__file__),
+                                                          conversion_file_cmd,
+                                                          tmp_fn, tmp_fn2,
+                                                          version)
+        os.system(cmd)
         # Read list of files from file and pipe into conversion script
-        os.system('cat conversion_list.txt | ./../convert_h5file --release={}'.format(version))
+        cmd = 'cat conversion_list.txt | python {}/../{} {}={}'.format(os.path.dirname(__file__),
+                                                                       conversion_file_cmd,
+                                                                       '--release',
+                                                                       version)
+        os.system(cmd)
         os.remove('conversion_list.txt')
         # Find files based on pattern using `find` and pipe into conversion script
-        os.system('find -name "data*.h5" | ./../convert_h5file --release={}'.format(version))
+        cmd = 'find -name "data*.h5" | python {}/../{} {}={}'.format(os.path.dirname(__file__),
+                                                                     conversion_file_cmd,
+                                                                     '--release',
+                                                                     version)
+        os.system(cmd)
 
         res2 = h5w.load(tmp_fn)
         for key, value in res.items():
