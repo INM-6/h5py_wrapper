@@ -26,7 +26,11 @@ except ImportError:
     quantities_found = False
 
 # make sure correct h5py version is available
-if int(re.sub('\.', '', h5py.version.version)) < 231:
+h5py_version = h5py.version.version_tuple
+h5py_version_int = int('{}{}{}'.format(h5py_version.major,
+                                       h5py_version.minor,
+                                       h5py_version.bugfix))
+if h5py_version_int < 231:
     raise ImportError("Using h5py version {version}. Version must "
                       "be >= 2.3.1".format(version=h5py.version.version))
 
