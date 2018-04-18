@@ -37,6 +37,14 @@ Conversion from old releases
 
    conversion
 
+Release Notes
+=============
+.. toctree::
+   :maxdepth: 2
+
+   release_notes
+
+
 
 Indices and tables
 ==================

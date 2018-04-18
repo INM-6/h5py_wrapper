@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'h5py_wrapper'
-copyright = u'2016, Maximilian Schmidt, Jakob Jordan'
+copyright = u'2018, Maximilian Schmidt, Jakob Jordan'
 author = u'Maximilian Schmidt, Jakob Jordan'
 
 # The version info for the project you're documenting, acts as replacement for
