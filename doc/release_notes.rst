@@ -28,9 +28,9 @@ The deprecated functions `add_to_h5` and `load_h5` were removed.
 Contributors
 ++++++++++++
 
-Maximilian Schmidt
-Jakob Jordan
-Julia Sprenger
+- Maximilian Schmidt
+- Jakob Jordan
+- Julia Sprenger
 
 1.0.1
 =====
@@ -56,8 +56,8 @@ This has the effect that old files created with release version 0.0.1 cannot be 
 Contributors
 ++++++++++++
 
-Maximilian Schmidt
-Jakob Jordan
+- Maximilian Schmidt
+- Jakob Jordan
 	      
 v0.0.1
 ======
@@ -74,8 +74,8 @@ Contributors
 
 (in alphabetical order)
 
-Hannah Bos
-Michael Denker
-Jakob Jordan
-Maximilian Schmidt
-Jannis Schuecker
+- Hannah Bos
+- Michael Denker
+- Jakob Jordan
+- Maximilian Schmidt
+- Jannis Schuecker
