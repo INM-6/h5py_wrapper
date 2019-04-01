@@ -392,12 +392,6 @@ def test_conversion_script(tmpdir):
         os.remove(tmp_fn2)
 
 
-def test_raises_error_for_dictlabel_and_path():
-    res = {}
-    with pytest.raises(ValueError):
-        h5w.save(fn, res, dict_label='test', path='test')
-
-
 @pytest.fixture()
 def cleanup():
     yield

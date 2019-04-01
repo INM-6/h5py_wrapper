@@ -36,7 +36,7 @@ if h5py_version_int < 231:
 
 
 def save(filename, d, write_mode='a', overwrite_dataset=False,
-         resize=False, path=None, dict_label='', compression=None):
+         resize=False, path=None, compression=None):
     """
     Save a dictionary to an hdf5 file.
 
@@ -87,15 +87,6 @@ def save(filename, d, write_mode='a', overwrite_dataset=False,
                       "file)".format(filename=filename))
     else:
         try:
-            if dict_label:
-                warnings.warn("Deprecated argument dict_label provided. "
-                              "dict_label will be removed in the next release. "
-                              "Please use path instead.",
-                              DeprecationWarning)
-                if path is not None:
-                    raise ValueError("dict_label and path must not "
-                                     "be defined simultaneously.")
-                path = dict_label                
             if path:
                 base = f.require_group(path)
                 _dict_to_h5(f, d, overwrite_dataset, parent_group=base,
