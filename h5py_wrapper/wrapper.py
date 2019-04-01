@@ -172,7 +172,7 @@ def _dict_to_h5(f, d, overwrite_dataset, compression=None, parent_group=None):
     if parent_group is None:
         parent_group = f.parent
     for key, value in d.items():
-        if isinstance(value, collections.MutableMapping):
+        if isinstance(value, collections.abc.MutableMapping):
             group_name = os.path.join(parent_group.name, str(key))
             group = f.require_group(group_name)
             _dict_to_h5(f, value, overwrite_dataset, parent_group=group,
@@ -227,7 +227,7 @@ def _create_dataset(parent_group, key, value, compression=None):
             dataset = parent_group.create_dataset(
                 str(key), data=lib.convert_iterable_to_numpy_array(value), compression=compression)
     # ignore compression argument for scalar datasets
-    elif not isinstance(value, collections.Iterable):
+    elif not isinstance(value, collections.abc.Iterable):
         dataset = parent_group.create_dataset(str(key), data=value)
     else:
         dataset = parent_group.create_dataset(
