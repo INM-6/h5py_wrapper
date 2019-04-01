@@ -278,10 +278,10 @@ def _load_dataset(f, lazy=False):
                     'custom_shape' in f.attrs):
                 return _load_custom_shape(f)
             elif '_unit' in f.attrs:
-                return _cast_value_type(f.value, value_type,
+                return _cast_value_type(f[()], value_type,
                                         unit=f.attrs['_unit'])
             else:
-                return _cast_value_type(f.value, value_type)
+                return _cast_value_type(f[()], value_type)
 
 
 def _evaluate_key(f):
@@ -303,7 +303,7 @@ def _load_custom_shape(f):
     Reshape array with unequal dimensions into original shape.
     """
     data_reshaped = []
-    value = f.value
+    value = f[()]
     custom_value_types = f.attrs['custom_value_types'].astype(np.unicode_)
     for (j, i), value_type in zip(lib.accumulate(f.attrs['oldshape']),
                                   custom_value_types):
